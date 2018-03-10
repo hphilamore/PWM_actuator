@@ -18,7 +18,7 @@ n_base_sections = 4
 n_additional_sections = 4
 rad = 27
 ang = 0.9
-#single_actuator_section = True
+bi_directional_actuator = True
 single_plot = True # True = Single fig at end with all configs, False = New fig each loop 
 
 base_sections = [
@@ -112,34 +112,35 @@ for b, a in zip(base_sections, additional_sections):
 							 actuator_base = True, 
 							 base_links = b)
 
-	A = actuator_1way_series(n_additional_sections, 
-		                     radius = rad,
-							 arc_angle = ang,
-							 set_plot_colour = True,
-							 plot_colour = c,
-		                     actuator_base = False, 
-		                     base_links = b, 
-		                     addtnl_links = a, 
-		                     )
+	if bi_directional_actuator:
+		A = actuator_1way_series(n_additional_sections, 
+			                     radius = rad,
+								 arc_angle = ang,
+								 set_plot_colour = True,
+								 plot_colour = c,
+			                     actuator_base = False, 
+			                     base_links = b, 
+			                     addtnl_links = a, 
+			                     )
 
-	series = b + a
+	if bi_directional_actuator:
+		series = b + a 
+		end_coordinates = np.array([B[2], A[2]])
+	else:
+		series = b
+		end_coordinates = np.array([B[2], np.array([0.0, 0.0])])
 
-	print(f"end coordinates {B[2], A[2]}")
-	end_coordinates = np.array([B[2], A[2]])
-
-	# actuator_length = np.sqrt((B[2][0]-A[2][0])**2 + 
-	# 	                      (B[2][1]-A[2][1])**2)
 
 	actuator_length = np.sqrt((end_coordinates[0][0] - end_coordinates[1][0])**2 + 
 		                      (end_coordinates[0][1] - end_coordinates[1][1])**2)
 
 	###################################
-	# TODO: replace with imported function that does exactly the same but isn't working
+	# TODO: replace with imported function that does exactly the same but isn't working for an unknown reason
 	# angle_to_Xdatum = angle_to_Xdatum(B[2], A[2], actuator_length)
 	x = 0
 	y = 1
 	point = B[2]
-	origin = A[2]
+	origin = A[2] if bi_directional_actuator else np.array([0.0, 0.0])
 	acute_angle = np.arcsin(abs( origin[y] - point[y] ) / actuator_length)
 	quadrant = np.empty((2))
 	quadrant[x] = 1 if (point[x] > origin[x]) else 0
@@ -153,7 +154,12 @@ for b, a in zip(base_sections, additional_sections):
 
 	# New figure each time code loops
 	if not single_plot:
-		output_figure(''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png')
+		if bi_directional_actuator:
+			fname = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png' 
+		else:
+			fname = ''.join(str(bb) for bb in b) + '.png' 
+		output_figure(fname)
+
 		# plt.xlim(0, 40)
 		# plt.ylim(0, 40)
 		# plt.axis('equal')

@@ -71,10 +71,14 @@ def actuator_1way_series(n,
                                          radius * np.sin(start_angle)]) 
 
 
-        # re-centre the start point at (0,0)
+        # # re-centre the start point at (0,0)
+        plt.plot(start_point[x], start_point[y], 'mo')
+        plt.plot(origin[x], origin[y], 'mo')
         offset = start_point
-        start_point -= offset
-        origin -= offset
+        start_point, origin = start_point - offset, origin - offset
+        # origin -= offset
+        plt.plot(start_point[x], start_point[y], 'cx')
+        plt.plot(origin[x], origin[y], 'cx')
         
 
         if not actuator_base:
@@ -153,7 +157,10 @@ def actuator_1way_series(n,
 
     # start point
     if n == 1: 	
-    	plt.plot(arc[x, 0], arc[y, 0], 'ro')
+    	if actuator_base:
+    		plt.plot(arc[x, 0], arc[y, 0], 'ro')
+    	else:
+    		plt.plot(arc[x, 0], arc[y, 0], 'g^')
     else:
     	plt.plot(arc[x, 0], arc[y, 0], 'ko')
 
