@@ -43,41 +43,52 @@ def actuator_1way_series(n,
     x = 0
     y = 1
     
-    state = base_links[n-1] if actuator_base else addtnl_links[n-1]
+    # the bistable state of the link
+    link_states = base_links if actuator_base else addtnl_links
+    state = link_states[n-1] 
     print(f"state {state}")
+
+    # the state of the first link in the actuator (all others connect to) 
     central_link_state = base_links[0]
     
+    # DEFINE FIRST LINK
+    # first link in series (base or additional) 
     if n == 1:        
         if central_link_state:
             start_angle = (0 - (arc_angle / 2)) 
         else:
             start_angle = (pi + (arc_angle / 2))
         
-        # origin of arc
+
+        # define the ORIGIN for vertically aligned arc
         sagitta = radius * (1 - np.cos(arc_angle / 2))
         origin = np.array(COA)
         origin[x] += (radius - sagitta) * (-1 if central_link_state else 1)
         
-        # start point of arc
-#         start_point = np.array([origin[x] + radius * np.cos(start_angle), 
-#                                 origin[y] + radius * np.sin(start_angle)])
-        start_point = origin + np.array([radius * np.cos(start_angle),                                             
-                                         radius * np.sin(start_angle)])
-        
-        
-        if not actuator_base:
-            # if bistable state is different to first link of base actuator section ... 
-            if state != central_link_state:
-                
-                # mirror origin 
-                origin = start_point + np.array([radius * np.cos(start_angle),                                             
-                                                 radius * np.sin(start_angle)])
 
-                print("origin mirrored to", origin)
-                
-                # redefine start_angle
+        # define the START POINT of the arc
+        start_point = origin + np.array([radius * np.cos(start_angle),                                             
+                                         radius * np.sin(start_angle)]) 
+
+
+        # re-centre the start point at (0,0)
+        offset = start_point
+        start_point -= offset
+        origin -= offset
+        
+
+        if not actuator_base:
+
+            # FLIP LINK DIRECTION IF NECESSARY 
+            if state != central_link_state:
+                # ...mirror ORIGIN of the arc in tangent to start point
+                origin = start_point + np.array([radius * np.cos(start_angle),                                             
+                                                 radius * np.sin(start_angle)])                
+                # ...redefine START ANGLE
                 start_angle = angle_to_Xdatum(start_point, origin, radius)
-               
+     
+    
+    # recursively define links after first link           
     else: 
         AB = actuator_base
         R = radius
@@ -98,23 +109,26 @@ def actuator_1way_series(n,
                                                                 set_plot_colour = SPC,
                                                                 plot_colour = PC)        
         
-        # if the bistable state is not same as previous link ...
-        link_states = base_links if actuator_base else addtnl_links
         
+        
+        # FLIP LINK DIRECTION IF NECESSARY 
         if link_states[n-1]!=link_states[n-2]:
-           # mirror origin in tangent to start point
+           # ...mirror ORIGIN of the arc in tangent to start point
             origin = start_point + np.array([radius * np.cos(start_angle),                                             
                                              radius * np.sin(start_angle)])
-            
-            print("origin changed to", origin)
+            # ...redefine START ANGLE
             start_angle = angle_to_Xdatum(start_point, origin, radius)
             
+    
     print(f"start_angle {start_angle} \norigin {origin} \nstart_point {start_point}")
     
 
+    # DEFINE ARC OF LINK
     if actuator_base:
+    	# draw links in upward direction
         arc_angles = start_angle + (arc_angle * (1 if state else -1))
     else:
+    	# draw links in downward direction
         arc_angles = start_angle + (arc_angle * (-1 if state else 1))
         
     arc_points = np.linspace(start_angle, arc_angles, numsegments)        
@@ -129,18 +143,19 @@ def actuator_1way_series(n,
     # arc = origin + radius * np.array([np.cos(arc_points),                                             
     #                                       np.sin(arc_points)])
    
-   	#arc
+   	# PLOT: 
+   	# ARC
     if set_plot_colour:
     	#plt.plot(arc[x], arc[y], color=plt.cm.cool(plot_colour))
-    	plt.plot(arc[x], arc[y], c=plot_colour)
-    	
-
+    	plt.plot(arc[x], arc[y], c=plot_colour)  
     else:
     	plt.plot(arc[x], arc[y])
 
     # start point
-    #if n == 1: 	
-    plt.plot(arc[x, 0], arc[y, 0], 'ko')
+    if n == 1: 	
+    	plt.plot(arc[x, 0], arc[y, 0], 'ro')
+    else:
+    	plt.plot(arc[x, 0], arc[y, 0], 'ko')
 
     # origin
     #plt.plot(origin[x], origin[y], 'go')
@@ -150,7 +165,7 @@ def actuator_1way_series(n,
     
 
 
-    # end angle (between end_point-origin and 1st quadrant horizontal datum)
+    # define link end angle 
     end_point = arc[:, -1]   
     end_angle = angle_to_Xdatum(end_point, 
                                 origin, radius)

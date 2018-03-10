@@ -18,6 +18,7 @@ n_base_sections = 4
 n_additional_sections = 4
 rad = 27
 ang = 0.9
+#single_actuator_section = True
 single_plot = True # True = Single fig at end with all configs, False = New fig each loop 
 
 base_sections = [
