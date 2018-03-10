@@ -139,11 +139,11 @@ def actuator_1way_series(n,
     	plt.plot(arc[x], arc[y])
 
     # start point
-    if n == 1: 	
-    	plt.plot(arc[x, 0], arc[y, 0], 'ko')
+    #if n == 1: 	
+    plt.plot(arc[x, 0], arc[y, 0], 'ko')
 
     # origin
-    plt.plot(origin[x], origin[y], 'go')
+    #plt.plot(origin[x], origin[y], 'go')
     plt.xlim(0, 40)
     plt.ylim(0, 40)
     plt.axis('equal') 

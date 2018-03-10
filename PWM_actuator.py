@@ -13,36 +13,70 @@ timestr = time.strftime('%Y-%m-%d--%H-%M-%S')
 dirname = '../../../Projects/PMW_robot/' + timestr + '/'
 os.makedirs(os.path.dirname(dirname), exist_ok=True)
 
+# SET PARAMETERS
 n_base_sections = 4
 n_additional_sections = 4
 rad = 27
-ang = 0.6
+ang = 0.9
+single_plot = True # True = Single fig at end with all configs, False = New fig each loop 
+
+base_sections = [
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 0],
+				 [1, 1, 0, 1],
+				 [1, 1, 0, 0],
+				 [0, 1, 1, 1],
+				 [0, 1, 1, 0],
+				 [1, 0, 1, 1],
+				 [1, 0, 1, 0]
+				 ]
+
+				 # [0, 1, 0, 1],
+				 # [0, 1, 0, 0],
+				 # [0, 1, 1, 0],
+				 # [0, 1, 0, 0],
+				 # [0, 0, 0, 1],
+				 # [0, 0, 0, 0]
+				 # ]	
+
+bs = []
+for i in reversed(base_sections):
+	bs.append([not j for j in i])
+for i in bs:
+	base_sections.append(i)
+print(base_sections)
 
 
-base_sections = [[1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1]]
 
-additional_sections = [[1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 1]]
+additional_sections = []
+for i in base_sections:
+	additional_sections.append([not j for j in i])
+
+				# [[1, 1, 1, 1],
+				#  [1, 1, 1, 1],
+				#  [1, 1, 1, 1],
+				#  [1, 1, 1, 1],
+				#  [1, 1, 1, 1],
+				#  [1, 1, 1, 1],
+				#  [1, 1, 1, 1],
+				#  [1, 1, 1, 1],
+				#  [1, 1, 1, 1],
+				#  [1, 1, 1, 1]]
 
 # BL = [1, 0, 1, 1, 0 ,0 ,1]
 # BL = [1, 0, 1, 0, 0 , 1 ,0]
+
+def output_figure(filename):
+		plt.xlim(0, 40)
+		plt.ylim(0, 40)
+		plt.axis('equal')
+		#filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
+		plt.savefig(dirname + filename, 
+					orientation='portrait', 
+					transparent=False) 
+		plt.show()
+
+
 
 assert len(base_sections) == len(additional_sections), "Fail: The number of configurations of each actuator section must be the same"
 #color=iter(plt.cm.rainbow(np.linspace(0,1,len(base_sections))))
@@ -116,15 +150,17 @@ for b, a in zip(base_sections, additional_sections):
 	angle_to_Xdatum = angle
 	###################################
 
-
-	plt.xlim(0, 40)
-	plt.ylim(0, 40)
-	plt.axis('equal')
-	filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
-	plt.savefig(dirname + filename, 
-				orientation='portrait', 
-				transparent=False) 
-	plt.show()
+	# New figure each time code loops
+	if not single_plot:
+		output_figure(''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png')
+		# plt.xlim(0, 40)
+		# plt.ylim(0, 40)
+		# plt.axis('equal')
+		# filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
+		# plt.savefig(dirname + filename, 
+		# 			orientation='portrait', 
+		# 			transparent=False) 
+		# plt.show()
 
 	d.append([ rad, 
 			   ang,
@@ -137,6 +173,19 @@ for b, a in zip(base_sections, additional_sections):
 			   np.round(actuator_length, 2),
 			   np.round(angle_to_Xdatum, 2)
 			   ])
+
+# Single figure at the end with all configs
+if single_plot:
+	output_figure('all_configs.png')
+	# plt.xlim(0, 40)
+	# plt.ylim(0, 40)
+	# plt.axis('equal')
+	# filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
+	# plt.savefig(dirname + filename, 
+	# 			orientation='portrait', 
+	# 			transparent=False) 
+	# plt.show()
+
 
 df = pd.DataFrame(d[1:], columns=d[0])
 filename = 'data.csv'
