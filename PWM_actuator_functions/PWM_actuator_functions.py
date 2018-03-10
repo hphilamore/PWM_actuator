@@ -34,7 +34,9 @@ def actuator_1way_series(n,
                          addtnl_links = [0, 1, 0, 1, 0, 1 ,0], 
 #                          arc_angle = 0.93, 
                          arc_angle = 0.6,
-                         COA = [0.0, 0.0]): 
+                         COA = [0.0, 0.0],
+                         set_plot_colour = False,
+                         plot_colour = 'k'): 
     "Plots 2D bistable actuators in a linked unidirectional series from a vertically aligned start section"
     
     numsegments = 1000
@@ -83,6 +85,8 @@ def actuator_1way_series(n,
         AL = addtnl_links
         AA = arc_angle
         C = COA
+        SPC = set_plot_colour
+        PC = plot_colour
         # angle of start of arc relative to horizontal datum
         start_angle, origin, start_point = actuator_1way_series(n-1, 
                                                                 actuator_base = AB, 
@@ -90,7 +94,9 @@ def actuator_1way_series(n,
                                                                 base_links = BL,
                                                                 addtnl_links = AL,
                                                                 arc_angle = AA,
-                                                                COA = C)        
+                                                                COA = C,
+                                                                set_plot_colour = SPC,
+                                                                plot_colour = PC)        
         
         # if the bistable state is not same as previous link ...
         link_states = base_links if actuator_base else addtnl_links
@@ -123,8 +129,20 @@ def actuator_1way_series(n,
     # arc = origin + radius * np.array([np.cos(arc_points),                                             
     #                                       np.sin(arc_points)])
    
-    plt.plot(arc[x], arc[y])
-    plt.plot(arc[x, 0], arc[y, 0])
+   	#arc
+    if set_plot_colour:
+    	#plt.plot(arc[x], arc[y], color=plt.cm.cool(plot_colour))
+    	plt.plot(arc[x], arc[y], c=plot_colour)
+    	
+
+    else:
+    	plt.plot(arc[x], arc[y])
+
+    # start point
+    if n == 1: 	
+    	plt.plot(arc[x, 0], arc[y, 0], 'ko')
+
+    # origin
     plt.plot(origin[x], origin[y], 'go')
     plt.xlim(0, 40)
     plt.ylim(0, 40)

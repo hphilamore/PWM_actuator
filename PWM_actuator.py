@@ -16,25 +16,39 @@ os.makedirs(os.path.dirname(dirname), exist_ok=True)
 n_base_sections = 4
 n_additional_sections = 4
 rad = 27
-ang = 0.93
+ang = 0.6
 
 
-base_sections = [[1, 1, 1, 1, 1, 1],
-				 [1, 1, 1, 1, 1, 1],
-				 [0, 1, 0, 1, 0, 1],
-				 # [0, 1, 0, 1, 0, 1],
-				 # [0, 1, 0, 1, 0, 1],
-				 [0, 1, 0, 1, 0, 1]]
+base_sections = [[1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1]]
 
-additional_sections = [[0, 1, 0, 1, 0, 1],
-				 	   [1, 1, 1, 1, 1, 1],
-				       [0, 1, 0, 1, 0, 1],
-				     #   [0, 1, 0, 1, 0, 1],
-				     #   [0, 1, 0, 1, 0, 1],
-				       [0, 1, 0, 1, 0, 1]]
+additional_sections = [[1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1],
+				 [1, 1, 1, 1]]
 
 # BL = [1, 0, 1, 1, 0 ,0 ,1]
 # BL = [1, 0, 1, 0, 0 , 1 ,0]
+
+assert len(base_sections) == len(additional_sections), "Fail: The number of configurations of each actuator section must be the same"
+#color=iter(plt.cm.rainbow(np.linspace(0,1,len(base_sections))))
+nlines = len(base_sections)
+#colour_idx = np.linspace(0, 1, n_lines)
+color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
 					
 d = []
 d.append(['radius', 
@@ -46,20 +60,32 @@ d.append(['radius',
 	 'end_to_end_length', 
 	 'end_to_end_angle'])
 
+
+
+# TODO : OOP
+# TODO : encapsulate in function
+
 for b, a in zip(base_sections, additional_sections):
+
+	c=next(color)
 
 	B = actuator_1way_series(n_base_sections, 
 							 radius = rad,
-							 arc_angle = ang, 	
+							 arc_angle = ang, 
+							 set_plot_colour = True,	
+							 plot_colour = c,	
 							 actuator_base = True, 
 							 base_links = b)
 
 	A = actuator_1way_series(n_additional_sections, 
 		                     radius = rad,
 							 arc_angle = ang,
+							 set_plot_colour = True,
+							 plot_colour = c,
 		                     actuator_base = False, 
 		                     base_links = b, 
-		                     addtnl_links = a)
+		                     addtnl_links = a, 
+		                     )
 
 	series = b + a
 
