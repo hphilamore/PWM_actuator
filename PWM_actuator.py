@@ -16,10 +16,11 @@ os.makedirs(os.path.dirname(dirname), exist_ok=True)
 # SET PARAMETERS
 n_base_sections = 4
 n_additional_sections = 4
-rad = 27
-ang = 0.9
+rad = 19.180
+#ang = 0.9
+ang = 0.898
 bi_directional_actuator = True
-single_output_fig = False # True = Single fig at end with all configs, False = New fig each loop 
+single_output_fig = True # True = Single fig at end with all configs, False = New fig each loop 
 
 base_sections = [
 				 [1, 1, 1, 1],
@@ -68,11 +69,12 @@ for i in base_sections:
 # BL = [1, 0, 1, 0, 0 , 1 ,0]
 
 def output_figure(filename):
-		plt.xlim(0, 40)
-		plt.ylim(0, 40)
-		plt.axis('equal')
+		#plt.axis('equal')
+		plt.gca().set_aspect(1)
+		plt.xlim = (-300, +300)
+		plt.ylim = (-300, +300)
 		#filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
-		plt.savefig(dirname + filename, 
+		plt.savefig(dirname + filename + ".pdf", 
 					orientation='portrait', 
 					transparent=False) 
 		plt.show()
@@ -155,9 +157,9 @@ for b, a in zip(base_sections, additional_sections):
 	# New figure each time code loops
 	if not single_output_fig:
 		if bi_directional_actuator:
-			fname = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png' 
+			fname = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) 
 		else:
-			fname = ''.join(str(bb) for bb in b) + '.png' 
+			fname = ''.join(str(bb) for bb in b) 
 		output_figure(fname)
 
 		# plt.xlim(0, 40)
@@ -183,7 +185,7 @@ for b, a in zip(base_sections, additional_sections):
 
 # Single figure at the end with all configs
 if single_output_fig:
-	output_figure('all_configs.png')
+	output_figure('all_configs')
 	# plt.xlim(0, 40)
 	# plt.ylim(0, 40)
 	# plt.axis('equal')
