@@ -19,7 +19,7 @@ n_additional_sections = 4
 rad = 27
 ang = 0.9
 bi_directional_actuator = True
-single_plot = True # True = Single fig at end with all configs, False = New fig each loop 
+single_output_fig = False # True = Single fig at end with all configs, False = New fig each loop 
 
 base_sections = [
 				 [1, 1, 1, 1],
@@ -42,7 +42,7 @@ base_sections = [
 
 bs = []
 for i in reversed(base_sections):
-	bs.append([not j for j in i])
+	bs.append([int(not j) for j in i])
 for i in bs:
 	base_sections.append(i)
 print(base_sections)
@@ -51,7 +51,7 @@ print(base_sections)
 
 additional_sections = []
 for i in base_sections:
-	additional_sections.append([not j for j in i])
+	additional_sections.append([int(not j) for j in i])
 
 				# [[1, 1, 1, 1],
 				#  [1, 1, 1, 1],
@@ -153,7 +153,7 @@ for b, a in zip(base_sections, additional_sections):
 	###################################
 
 	# New figure each time code loops
-	if not single_plot:
+	if not single_output_fig:
 		if bi_directional_actuator:
 			fname = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png' 
 		else:
@@ -182,7 +182,7 @@ for b, a in zip(base_sections, additional_sections):
 			   ])
 
 # Single figure at the end with all configs
-if single_plot:
+if single_output_fig:
 	output_figure('all_configs.png')
 	# plt.xlim(0, 40)
 	# plt.ylim(0, 40)
