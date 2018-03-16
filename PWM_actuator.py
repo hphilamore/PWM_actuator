@@ -5,8 +5,10 @@ import os
 import time
 import pandas as pd
 
-import PWM_actuator_functions.PWM_actuator_functions
-from PWM_actuator_functions.PWM_actuator_functions import *
+# import PWM_actuator_functions.PWM_actuator_functions
+# from PWM_actuator_functions.PWM_actuator_functions import *
+import PWM_actuator_functions.PWM_actuator_functions_DH
+from PWM_actuator_functions.PWM_actuator_functions_DH import *
 
 # dirname = "../../../Projects/PMW_robot/folder/.file.txt"
 timestr = time.strftime('%Y-%m-%d--%H-%M-%S')
@@ -69,10 +71,9 @@ for i in base_sections:
 # BL = [1, 0, 1, 0, 0 , 1 ,0]
 
 def output_figure(filename):
-		#plt.axis('equal')
+		plt.axis('equal')
 		plt.gca().set_aspect(1)
-		plt.xlim = (-300, +300)
-		plt.ylim = (-300, +300)
+		# 
 		#filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
 		plt.savefig(dirname + filename + ".pdf", 
 					orientation='portrait', 
@@ -81,7 +82,7 @@ def output_figure(filename):
 
 
 
-assert len(base_sections) == len(additional_sections), "Fail: The number of configurations of each actuator section must be the same"
+assert len(base_sections) == len(additional_sections), "Fail: The number of actuator sections in each configuration must be the same"
 #color=iter(plt.cm.rainbow(np.linspace(0,1,len(base_sections))))
 nlines = len(base_sections)
 #colour_idx = np.linspace(0, 1, n_lines)

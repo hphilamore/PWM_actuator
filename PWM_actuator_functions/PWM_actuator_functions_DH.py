@@ -169,8 +169,8 @@ def actuator_1way_series(n,
     #plt.plot(origin[x], origin[y], 'go')
     # plt.xlim(0, 40)
     # plt.ylim(0, 40)
-    plt.xlim = (-300, 300)
-    plt.ylim = (-300, 300)
+    # plt.xlim = (-300, 300)
+    # plt.ylim = (-300, 300)
     #plt.axis('equal') 
     
 
