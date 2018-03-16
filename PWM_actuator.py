@@ -5,10 +5,10 @@ import os
 import time
 import pandas as pd
 
-# import PWM_actuator_functions.PWM_actuator_functions
-# from PWM_actuator_functions.PWM_actuator_functions import *
-import PWM_actuator_functions.PWM_actuator_functions_DH
-from PWM_actuator_functions.PWM_actuator_functions_DH import *
+import PWM_actuator_functions.PWM_actuator_functions
+from PWM_actuator_functions.PWM_actuator_functions import *
+# import PWM_actuator_functions.PWM_actuator_functions_DH
+# from PWM_actuator_functions.PWM_actuator_functions_DH import *
 
 # dirname = "../../../Projects/PMW_robot/folder/.file.txt"
 timestr = time.strftime('%Y-%m-%d--%H-%M-%S')
