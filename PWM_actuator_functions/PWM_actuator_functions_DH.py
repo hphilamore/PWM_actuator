@@ -3,21 +3,23 @@ from numpy import pi as pi
 import matplotlib.pyplot as plt
 import sympy as sp
 # initialize printing so that all of the mathematical expressions can be rendered in standard mathematical notation
-from sympy.physics.vector import init_vprinting
-init_vprinting(use_latex='mathjax', pretty_print=False)
+# from sympy.physics.vector import init_vprinting
+# init_vprinting(use_latex='mathjax', pretty_print=False)
 #from sympy.physics.mechanics import dynamicsymbols, Point, ReferenceFrame
 
 # bi-state 0 = bend to left --> draw link by moving through NEGATIVE angular displacement in regular cartesion FOR
 # bi_state 1 = bend to right --> draw link by moving through POSITIVE angular displacement in regular cartesian FOR
 # COA = central point of actuator 
 
-def angle_to_Xdatum(point, o, r):
+def angle_to_Xdatum(point, o, radius):
     "Returns angle between point-origin and 1st quadrant horizontal datum"
     x = 0
     y = 1
     origin = o
-    radius = r
-    acute_angle = np.arcsin(abs( origin[y] - point[y] ) / radius)
+    # radius = r
+    # acute_angle = np.arcsin(float(abs( origin[y] - point[y] ) / radius))
+    print(float(abs( point[y] - origin[y] ) / radius))
+    acute_angle = np.arcsin(float(abs( point[y] - origin[y] ) / radius))
     quadrant = np.empty((2))
     quadrant[x] = 1 if (point[x] > origin[x]) else 0
     quadrant[y] = 1 if (point[y] > origin[y]) else 0
@@ -42,11 +44,12 @@ def plot_bistable_actuator(numLinks,
                          joint_ranges = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3],
                          link_offset = 0,
                          link_twist = 0,
-                         addtnl_links = [0, 1, 0, 1, 0, 1 ,0], 
+                         #addtnl_links = [0, 1, 0, 1, 0, 1 ,0], 
 #                          arc_angle = 0.93, 
                          # arc_angle = 0.6,
                          #arc_angle = 0.898,
                          #COA = [0.0, 0.0],
+                         draw_actuator = True,
                          set_plot_colour = False,
                          plot_colour = 'k'): 
     "Plots 2D bistable actuators in a linked unidirectional series from a vertically aligned start section"
@@ -54,6 +57,11 @@ def plot_bistable_actuator(numLinks,
     numsegments = 1000
     x = 0
     y = 1
+
+    SP = sp.Matrix([start_point[0],
+					start_point[1],
+					0,
+					1])
 
     aList = sp.symbols('a0:%d'%numLinks)
     tList = sp.symbols('theta0:%d'%numLinks)
@@ -98,23 +106,134 @@ def plot_bistable_actuator(numLinks,
     			angle += pi/2
 
     		H = Ai.subs({a:ai, theta:ti})
+    		arc_start = SP
+
 
 
     	else:
     		# the offset angle due to angle of tip of previous link 
     		angle += joint_range/2 if link_states[n-1] else (-joint_range/2)
+    		
     		H *= Ai.subs({a:ai, theta:ti})
 
-    	joint_angles.append(angle)
-    	
-    	# 
-    	# H *= Ai.subs({a:ai, theta:ti})
+    		arc_start = arc_end
 
+    	joint_angles.append(angle)
+
+
+
+    	if draw_actuator:
+	    	# substitute numerical values to get end point at each link to plot the actuator
+	    	# simplify terms of matrix
+		    for y in range(Ai.shape[0]):
+		    	for x in range(Ai.shape[1]):
+		    		H[y,x] = sp.trigsimp(H[y,x].simplify())
+
+		    Hn = H.subs({d:link_offset, alpha:link_twist})
+
+		    for ai, ti, a_val, t_val in zip(aList[:numLinks], 
+		    	                            tList[:numLinks], 
+		    	                            link_lengths[:numLinks], 
+		    	                            joint_angles[:numLinks]):
+		    	Hn = Hn.subs({ai:a_val, ti:t_val})
+
+		    EP = Hn * SP
+
+		    arc_end = EP
+
+
+		    # find arc radius
+		    radius = length / (2 * sp.sin(joint_range/2))
+
+		    # find origin of curve
+		    a_to_x = angle_to_Xdatum(arc_end, arc_start, radius)
+
+		    print("link:" , (n+1))
+		    print("SP:", SP)
+		    print("EP:", EP)
+		    print("arc start:", arc_start)
+		    print("arc end:", arc_end)
+		    print("joint_angles:", joint_angles)
+		    print(H)
+		    print("angle to x datum:" , a_to_x)
+		    print()
+
+	    	# acute_angle = np.arcsin(abs( origin[y] - point[y] ) / radius)
+		    # quadrant = np.empty((2))
+		    # quadrant[x] = 1 if (point[x] > origin[x]) else 0
+		    # quadrant[y] = 1 if (point[y] > origin[y]) else 0
+
+		    # if np.allclose(quadrant,  np.array([1, 1])):   angle = acute_angle
+		    # elif np.allclose(quadrant,  np.array([0, 1])): angle = pi - acute_angle
+		    # elif np.allclose(quadrant,  np.array([0, 0])): angle = pi + acute_angle
+		    # else:                                          angle = 2 * pi - acute_angle
+		        
+		    # return angle
+	    	
+	    	# 
+	    	# H *= Ai.subs({a:ai, theta:ti})
+
+	    	# DEFINE ARC OF LINK
+		    # if fixed_at_bottom:
+		    # 	# draw links in upward direction
+		    #     arc_angles = start_angle + (arc_angle * (1 if state else -1))
+		    # else:
+		    # 	# draw links in downward direction
+		    #     arc_angles = start_angle + (arc_angle * (-1 if state else 1))
+		        
+		    # arc_points = np.linspace(start_angle, arc_angles, numsegments)        
+
+		    # arc = np.array([origin[x] + radius * np.cos(arc_points), 
+		    #                 origin[y] + radius * np.sin(arc_points)])    
+		    
+		    # # TODO : refactor so that formula below follows same pattern used throughout
+		    # #        convert origin to 2x1 array
+		    # #        edit code throughout to accept origin as 2D array
+		    # # origin = origin.reshape(2,1)
+		    # # arc = origin + radius * np.array([np.cos(arc_points),                                             
+		    # #                                       np.sin(arc_points)])
+		   
+		   	# # PLOT: 
+		   	# # ARC
+		    # if set_plot_colour:
+		    # 	#plt.plot(arc[x], arc[y], color=plt.cm.cool(plot_colour))
+		    # 	plt.plot(arc[x], arc[y], c=plot_colour)  
+		    # else:
+		    # 	plt.plot(arc[x], arc[y])
+
+		    # # start point
+		    # if n == 1: 	
+		    # 	if actuator_base:
+		    # 		plt.plot(arc[x, 0], arc[y, 0], 'ro')
+		    # 	else:
+		    # 		plt.plot(arc[x, 0], arc[y, 0], 'g^')
+		    # else:
+		    # 	plt.plot(arc[x, 0], arc[y, 0], 'ko')
+
+		    # # origin
+		    # #plt.plot(origin[x], origin[y], 'go')
+		    # # plt.xlim(0, 40)
+		    # # plt.ylim(0, 40)
+		    # plt.xlim = (-300, 300)
+		    # plt.ylim = (-300, 300)
+		    # #plt.axis('equal') 
+		    
+
+
+		    # # define link end angle 
+		    # end_point = arc[:, -1]   
+		    # end_angle = angle_to_Xdatum(end_point, 
+		    #                             origin, radius)
+		    
+		    # print(f"end_angle {end_angle} \norigin {origin} \nend_point {end_point} \n \n")
+		    
+		    # return end_angle, origin, end_point 
+
+    # simplify terms of matrix
     for y in range(Ai.shape[0]):
     	for x in range(Ai.shape[1]):
     		H[y,x] = sp.trigsimp(H[y,x].simplify())
 
-    H
 
 	# substitute in numerical values
     Hn = H.subs({d:link_offset, alpha:link_twist})
@@ -135,25 +254,25 @@ def plot_bistable_actuator(numLinks,
     return EP
 
     
-EP = plot_bistable_actuator(2,
+# EP = plot_bistable_actuator(2,
 
-                         fixed_at_bottom = True, # False = fixed at top of actuator
-                         link1_fixed_fixed = False, # False = link1_fixed_free
-                         start_point = (0,0),
-                         radius = 27, 
-                         link_states = [0, 0, 0, 1, 0 , 1 ,0], 
-                         link_lengths = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0],
-                         joint_ranges = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3],
-                         link_offset = 0,
-                         link_twist = 0,
-                         addtnl_links = [0, 1, 0, 1, 0, 1 ,0], 
-#                          arc_angle = 0.93, 
-                         # arc_angle = 0.6,
-                         #arc_angle = 0.898,
-                         #COA = [0.0, 0.0],
-                         set_plot_colour = False,
-                         plot_colour = 'k')
-             
+#                          fixed_at_bottom = True, # False = fixed at top of actuator
+#                          link1_fixed_fixed = True, # False = link1_fixed_free
+#                          start_point = (0,0),
+#                          radius = 27, 
+#                          link_states = [0, 0, 0, 1, 0 , 1 ,0], 
+#                          link_lengths = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0],
+#                          joint_ranges = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3],
+#                          link_offset = 0,
+#                          link_twist = 0,
+#                          #addtnl_links = [0, 1, 0, 1, 0, 1 ,0], 
+# #                          arc_angle = 0.93, 
+#                          # arc_angle = 0.6,
+#                          #arc_angle = 0.898,
+#                          #COA = [0.0, 0.0],
+#                          set_plot_colour = False,
+#                          plot_colour = 'k')
+EP = plot_bistable_actuator(2)           
 print(EP)
 
 
