@@ -4,8 +4,56 @@
 		"selected_items":
 		[
 			[
+				"plot",
+				"plot_end_angle"
+			],
+			[
+				"ori",
+				"origin"
+			],
+			[
+				"end",
+				"end_point"
+			],
+			[
+				"fixed",
+				"fixed_at_bottom"
+			],
+			[
+				"arc_end",
+				"arc_end_to_origin"
+			],
+			[
+				"arc_s",
+				"arc_start_to_origin"
+			],
+			[
+				"jio",
+				"joint_range"
+			],
+			[
+				"arc",
+				"arc_start_to_x"
+			],
+			[
+				"joint",
+				"joint_range"
+			],
+			[
+				"join",
+				"joint_range"
+			],
+			[
+				"draw",
+				"draw_actuator"
+			],
+			[
 				"link",
 				"link_lengths"
+			],
+			[
+				"joint_",
+				"joint_angles"
 			],
 			[
 				"link1",
@@ -26,14 +74,6 @@
 			[
 				"single",
 				"single_plot"
-			],
-			[
-				"plot",
-				"plot_colour"
-			],
-			[
-				"end",
-				"end_coordinates"
 			],
 			[
 				"add",
@@ -114,10 +154,6 @@
 			[
 				"game",
 				"game_builder"
-			],
-			[
-				"draw",
-				"draw_ball"
 			]
 		]
 	},
@@ -136,7 +172,7 @@
 			"file": "PWM_actuator_functions/PWM_actuator_functions_DH.py",
 			"settings":
 			{
-				"buffer_size": 8086,
+				"buffer_size": 13859,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -259,6 +295,16 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"plot",
+			"start",
+			"end",
+			"sp",
+			"ep",
+			"numsegments",
+			"anle to",
+			"print",
+			"np",
+			"joint angles",
 			"fixed_at_base",
 			"base_links",
 			"actuator_base",
@@ -286,6 +332,12 @@
 		"regex": false,
 		"replace_history":
 		[
+			"P0",
+			"P1",
+			"start",
+			"end",
+			"num_plot_points",
+			"joint_ang_range",
 			"fixed_at_bottom",
 			"link_states",
 			"fixed_at_base",
@@ -323,8 +375,8 @@
 						"selection":
 						[
 							[
-								876,
-								876
+								1580,
+								1580
 							]
 						],
 						"settings":
@@ -332,7 +384,7 @@
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 90.0,
+						"translation.y": 765.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 1,
@@ -344,15 +396,15 @@
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 8086,
+						"buffer_size": 13859,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2268,
-								2268
+								7656,
+								7656
 							]
 						],
 						"settings":
@@ -360,7 +412,7 @@
 							"syntax": "Packages/Python/Python.sublime-syntax"
 						},
 						"translation.x": 0.0,
-						"translation.y": 360.0,
+						"translation.y": 334.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 0,
@@ -371,7 +423,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 23.0
+		"height": 34.0
 	},
 	"input":
 	{
@@ -402,7 +454,7 @@
 	"menu_visible": true,
 	"output.exec":
 	{
-		"height": 325.0
+		"height": 465.0
 	},
 	"output.find_results":
 	{
