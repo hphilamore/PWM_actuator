@@ -19,10 +19,16 @@ def angle_to_Xdatum(P0, P1, L):
     acute_angle = np.arcsin(float(abs( P1[y] - P0[y] ) / L))
     print("acute angle", acute_angle)
 
-    if   ((P1[x] > P0[x]) & (P1[y] > P0[y])): angle = acute_angle # print("Q1")
-    elif ((P1[x] < P0[x]) & (P1[y] > P0[y])): angle = pi - acute_angle#, print("Q2")
-    elif ((P1[x] < P0[x]) & (P1[y] < P0[y])): angle = pi + acute_angle#, print("Q3")
-    else:                                     angle = 2 * pi - acute_angle#, print("Q4")
+    # if   ((P1[x] > P0[x]) & (P1[y] > P0[y])): angle = acute_angle # print("Q1")
+    # elif ((P1[x] < P0[x]) & (P1[y] > P0[y])): angle = pi - acute_angle#, print("Q2")
+    # elif ((P1[x] < P0[x]) & (P1[y] < P0[y])): angle = pi + acute_angle#, print("Q3")
+    # else:                                     angle = 2 * pi - acute_angle#, print("Q4")
+
+    if   ((P0[x] <= P1[x]) & (P0[y] <= P1[y])): angle = acute_angle # print("Q1")
+    elif ((P0[x] > P1[x])  & (P0[y] <= P1[y])): angle = pi - acute_angle#, print("Q2")
+    elif ((P0[x] > P1[x])  & (P0[y] > P1[y])):  angle = pi + acute_angle#, print("Q3")
+    else: 										angle = 2 * pi - acute_angle#, print("Q4")
+
        
     print("angle =", angle) 
     return angle
@@ -36,11 +42,11 @@ def angle_to_Xdatum(P0, P1, L):
     
 def plot_bistable_actuator(numLinks,
                          *, 
-                         fixed_at_bottom = True, # False = fixed at top of actuator
+                         actuator_extends_up = False, # False = fixed at top of actuator
                          link1_fixed_fixed = True, # False = link1_fixed_free
                          start_point = (0,0),
                          radius = 27, 
-                         link_states = [1, 1, 0, 1, 0 , 1 ,0], 
+                         link_states = [1, 1, 0, 1, 0, 1 ,0], 
                          link_lengths = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0],
                          joint_ranges = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3],
                          link_offset = 0,
@@ -59,6 +65,7 @@ def plot_bistable_actuator(numLinks,
     x = 0
     y = 1
 
+
     SP = sp.Matrix([start_point[0],
 					start_point[1],
 					0,
@@ -69,9 +76,21 @@ def plot_bistable_actuator(numLinks,
     theta, a, alpha, d = sp.symbols('theta, a, alpha, d')
     theta, a, alpha, d
 
-    rot = sp.Matrix([[sp.cos(theta), -sp.sin(theta), 0],
-    				 [sp.sin(theta),  sp.cos(theta), 0],
-    				 [0,              0,             1]])
+    if actuator_extends_up:
+    	rot = sp.Matrix([[sp.cos(theta), -sp.sin(theta), 0], 
+    		             [sp.sin(theta),  sp.cos(theta), 0], 
+    		             [0,              0,             1]])
+    else:
+    	rot = sp.Matrix([[sp.cos(theta),  -sp.sin(theta), 0], 
+    		             [sp.sin(theta),  sp.cos(theta), 0], 
+    		             [0,               0,             1]])
+	    # rot = sp.Matrix([[sp.cos(theta), -sp.sin(theta), 0],
+	    # 				 [sp.sin(theta),  sp.cos(theta), 0],
+	    # 				 [0,              0,             1]])
+
+	#rot = sp.Matrix([[sp.cos(theta), -sp.sin(theta), 0], [sp.sin(theta),  sp.cos(theta), 0], [0,              0,             1]])
+
+
 
     trans = sp.Matrix([a * sp.cos(theta),
 	                   a * sp.sin(theta),
@@ -92,8 +111,9 @@ def plot_bistable_actuator(numLinks,
     															 link_lengths[:numLinks], 
     															 aList[:numLinks], 
     															 tList[:numLinks])):
-    	
-    	angle = joint_range/2 if state else (-joint_range/2)
+    	bend_CCW = state
+
+    	angle = joint_range/2 if bend_CCW else (-joint_range/2)
 
     	print()
     	print("link:" , (n+1))
@@ -103,11 +123,11 @@ def plot_bistable_actuator(numLinks,
 
     		# fixed end 
     		if link1_fixed_fixed:
-    			angle = pi/2 
+    			angle = pi/2 if actuator_extends_up else (-pi/2)
     			
     		# free end
     		else:
-    			angle += pi/2
+    			angle += pi/2 if actuator_extends_up else (-pi/2)
 
     		H = Ai.subs({a:ai, theta:ti})
     		arc_start = SP
@@ -116,6 +136,10 @@ def plot_bistable_actuator(numLinks,
 
     	else:
     		# the offset angle due to angle of tip of previous link 
+    		# if actuator_extends_up:
+    		# 	angle += joint_range/2 if link_states[n-1] else (-joint_range/2)
+    		# else:
+    		# 	angle -= joint_range/2 if link_states[n-1] else (-joint_range/2)
     		angle += joint_range/2 if link_states[n-1] else (-joint_range/2)
     		
     		H *= Ai.subs({a:ai, theta:ti})
@@ -152,12 +176,21 @@ def plot_bistable_actuator(numLinks,
 		    cord_angle = angle_to_Xdatum(arc_start, arc_end, length)
 		    j = (pi - joint_range) / 2  # 1 of the 2 identical angles of the arc segment isoceles
 		    
-		    origin_angle = cord_angle + (j if state else (-j))
-		    # origin = (arc_start[x] + radius * np.cos(origin_angle),
+
+		    origin_angle = cord_angle + (j if bend_CCW else (-j))
+		    origin = (arc_start[x] + radius * np.cos(origin_angle),
+		    		  arc_start[y] + radius * np.sin(origin_angle))
+
+		    # if actuator_extends_up:
+		    # 	origin = (arc_start[x] + radius * np.cos(origin_angle),
+		    # 		  arc_start[y] + radius * np.sin(origin_angle))
+		    # else:
+		    # 	origin = (arc_start[x] + radius * np.cos(origin_angle),
 		    # 		  arc_start[y] + radius * np.sin(origin_angle))
 
-		    origin = np.array([arc_start[x] + radius * np.cos(origin_angle),
-		    		  		   arc_start[y] + radius * np.sin(origin_angle)])
+
+
+		    # origin = np.array([arc_start[x] + radius * np.cos(origin_angle, arc_start[y] + radius * np.sin(origin_angle)])
 
 		    # print ()
 		    
@@ -167,11 +200,11 @@ def plot_bistable_actuator(numLinks,
 		    # print(origin)
 		    plot_start_angle = angle_to_Xdatum(origin, arc_start, radius)
 		    # plot_end_angle = angle_to_Xdatum(origin, arc_end, radius)
-		    plot_end_angle = plot_start_angle + (joint_range if state else (-joint_range))
+		    plot_end_angle = plot_start_angle + (joint_range if bend_CCW else (-joint_range))
 		    # arc_end_to_origin = angle_to_Xdatum(origin, arc_end, radius)
 
 		    # deal with case where arc crosses from 4th to 1st quadrant
-		    # if state:
+		    # if bend_CCW:
 		    # 	if plot_start_angle > plot_end_angle:
 		    # 		plot_start_angle = -1 * (2 * pi - (plot_start_angle))
 		    # else:
@@ -203,11 +236,11 @@ def plot_bistable_actuator(numLinks,
 		    plt.plot(arc[x, 0], arc[y, 0], 'ro')
 		    plt.plot(arc_start[x], arc_start[y], 'g^')
 		    plt.plot(arc[x, -1], arc[y, -1], 'bo')
-		    plt.plot(arc_end[x], arc_end[y], 'k^')
+		    plt.plot(arc_end[x], arc_end[y], 'm^')
 
 		    # # start point
 		    # if n == 0: 	
-		    # 	if fixed_at_bottom:
+		    # 	if actuator_extends_up:
 		    # 		plt.plot(arc[x, 0], arc[y, 0], 'ro')
 		    # 		plt.plot(arc[x, 0], arc[y, 0], 'ro')
 		    # 		plt.plot(arc[x, 0], arc[y, 0], 'ro')
