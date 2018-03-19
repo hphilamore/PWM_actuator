@@ -159,7 +159,9 @@ def bistable_actuator(*, numLinks = 2,
     			angle += pi/2 if actuator_extends_up else (-pi/2)
 
     		H = Ai.subs({a:ai, theta:ti})
-    		arc_start = SP
+
+    		if draw_actuator:
+    			arc_start = SP
 
 
 
@@ -173,7 +175,8 @@ def bistable_actuator(*, numLinks = 2,
     		
     		H *= Ai.subs({a:ai, theta:ti})
 
-    		arc_start = arc_end
+    		if draw_actuator:
+    			arc_start = arc_end
 
     	joint_angles.append(angle)
 

@@ -5,6 +5,9 @@ import os
 import time
 import pandas as pd
 import itertools
+import time
+
+
 
 import PWM_actuator_functions.PWM_actuator_functions
 from PWM_actuator_functions.PWM_actuator_functions import *
@@ -14,14 +17,18 @@ timestr = time.strftime('%Y-%m-%d--%H-%M-%S')
 dirname = '../../../Projects/PMW_robot/' + timestr + '/'
 # os.makedirs(os.path.dirname(dirname), exist_ok=True)
 
+delta_1 = 0
+delta_2 = 0
+delta_3 = 0
+
 # SET PARAMETERS
 #n_top_of_actuator = 4
 #n_bottom_of_actuator = 4
 #rad = 19.180
 #ang = 0.9
 #ang = 0.898
-bi_directional_actuator = True
-single_output_fig = True # True = Single fig at end with all configs, False = New fig each loop 
+#bi_directional_actuator = True
+#single_output_fig = True # True = Single fig at end with all configs, False = New fig each loop 
 
 upper = [
 				 [1, 1, 1, 1],
@@ -47,7 +54,7 @@ for i in reversed(upper):
 	bs.append([int(not j) for j in i])
 for i in bs:
 	upper.append(i)
-print(upper)
+# print(upper)
 
 
 
@@ -120,7 +127,7 @@ joint_ranges_bottom = joint_ranges_top
 def actuator_assembly(*, nLinks_top, nLinks_bottom, 
 						 link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
-						 start_point = (0.0, 0.0)):
+						 start_point = (0.0, 0.0),  single_output_fig = True):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
 
 	d = []
@@ -145,16 +152,22 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 	upper_actuator = list(map(list, itertools.product([0, 1], repeat=nLinks_top)))
 	lower_actuator = list(map(list, itertools.product([0, 1], repeat=nLinks_bottom)))
-	upper_actuator = upper
-	lower_actuator = lower
-	assert len(upper_actuator) == len(lower_actuator), "Fail: The number of actuator sections in each configuration must be the same"
 
+	# print("lower", lower_actuator, len(lower_actuator))
+	# print("upper", upper_actuator, len(upper_actuator))
+	# upper_actuator = upper
+	# lower_actuator = lower
+	
 	nlines = len(upper_actuator)
 	color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
-	
-	bidirectional = True if (nLinks_bottom and nLinks_top) else False
 
-	for u_states, l_states in zip(upper_actuator, lower_actuator):
+	if (nLinks_bottom and nLinks_top):
+		bidirectional = True 
+		assert (len(upper_actuator) == len(lower_actuator)), "Fail: In the current model, the number of actuator sections in each configuration must be the same or zero"
+	else:
+		bidirectional = False
+
+	for u_states, l_states in itertools.zip_longest(upper_actuator, lower_actuator):
 
 		c=next(color)
 
@@ -236,13 +249,13 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			
 
 		d.append([ nLinks_top,
-				   u_states[:nLinks_top], 
-				   np.around(link_lengths_top[:nLinks_top], 2),
-				   np.around(joint_ranges_top[:nLinks_top], 2),
+				   u_states[:nLinks_top] if nLinks_top else None, 
+				   np.around(link_lengths_top[:nLinks_top], 2) if nLinks_top else None,
+				   np.around(joint_ranges_top[:nLinks_top], 2) if nLinks_top else None,
 				   nLinks_bottom,
-				   np.around(l_states[:nLinks_bottom], 2),
-				   np.around(link_lengths_bottom[:nLinks_bottom], 2), 
-				   np.around(joint_ranges_bottom[:nLinks_bottom], 2),
+				   np.around(l_states[:nLinks_bottom], 2) if nLinks_bottom else None,
+				   np.around(link_lengths_bottom[:nLinks_bottom], 2) if nLinks_bottom else None, 
+				   np.around(joint_ranges_bottom[:nLinks_bottom], 2) if nLinks_bottom else None,
 				   0,
 				   0,
 				   [round(end_coordinates[1][0],2), round(end_coordinates[1][1],2), 
@@ -278,8 +291,10 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 # 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 # 				  joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3])
 
-actuator_assembly(nLinks_top = 4, nLinks_bottom = 4, 
+start = time.time()
+
+actuator_assembly(nLinks_top = 5, nLinks_bottom = 0, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
-				  joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3])
+				  joint_ranges_top = [pi/6], joint_ranges_bottom = [pi/6])
 
 
