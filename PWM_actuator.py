@@ -50,9 +50,10 @@ print(upper_actuator)
 
 
 
-lower_actuator = []
-for i in upper_actuator:
-	lower_actuator.append([int(not j) for j in i])
+# lower_actuator = []
+# for i in upper_actuator:
+# 	lower_actuator.append([int(not j) for j in i])
+lower_actuator = upper_actuator
 
 				# [[1, 1, 1, 1],
 				#  [1, 1, 1, 1],
@@ -102,42 +103,47 @@ def output_figure(filename):
 		plt.show()
 
 
-def actuator_assembly(nLinks_top, nLinks_bottom, start_point = (0.0, 0.0)):
+def actuator_assembly(*, nLinks_top, nLinks_bottom, start_point = (0.0, 0.0)):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
 	
-	bidirectional = True if nLinks_bottom else False
+	bidirectional = True if (nLinks_bottom and nLinks_top) else False
 
-	for u, l in zip(upper_actuator, lower_actuator):
+	for u_states, l_states in zip(upper_actuator, lower_actuator):
 
 		c=next(color)
 
 		direction_up = True
-		tip_upper = bistable_actuator(numLinks = nLinks_top,
-		                  			  actuator_extends_up = direction_up, # False = fixed at top of actuator
-					                  	link1_fixed_fixed = True, # False = link1_fixed_free
-					                  	link_states = u, 
-					                  	link_lengths = link_lengths_top,
-					                  	joint_ranges = joint_ranges_top,
-					                  	draw_actuator = True,
-					                  	set_plot_colour = True,
-					                  	plot_colour = c)
+		if nLinks_top:
+			tip_upper = bistable_actuator(numLinks = nLinks_top,
+			                  			  actuator_extends_up = True, # False = fixed at top of actuator
+						                  	link1_fixed_fixed = True, # False = link1_fixed_free
+						                  	link_states = u_states, 
+						                  	link_lengths = link_lengths_top,
+						                  	joint_ranges = joint_ranges_top,
+						                  	draw_actuator = True,
+						                  	set_plot_colour = True,
+						                  	plot_colour = c)
 
 
-		if bidirectional:
+		if nLinks_bottom:
 			tip_lower = bistable_actuator(numLinks = nLinks_bottom,
-			                  			  actuator_extends_up = not direction_up, # False = fixed at top of actuator
+			                  			  actuator_extends_up = False, # False = fixed at top of actuator
 			                  				   link1_fixed_fixed = True, # False = link1_fixed_free
-			                  				   link_states = l, 
+			                  				   link_states = l_states, 
 			                  				   link_lengths = link_lengths_bottom,
 			                                   joint_ranges = joint_ranges_bottom,
 			                                   draw_actuator = True,
 			                                   set_plot_colour = True,
 			                                   plot_colour = c)
 
-
+		if bidirectional:
 			end_coordinates = [tip_upper, tip_lower]
 		else:
-			end_coordinates = [tip_upper, start_point]
+			if nLinks_top:
+				end_coordinates = [tip_upper, start_point]
+			else: 
+				end_coordinates = [tip_lower, start_point]
+
 
 
 		actuator_length = np.sqrt(float((end_coordinates[0][0] - end_coordinates[1][0])**2 + 
@@ -171,31 +177,42 @@ def actuator_assembly(nLinks_top, nLinks_bottom, start_point = (0.0, 0.0)):
 				fname = ''.join(str(upper) for upper in reversed(u)) + ''.join(str() for lower in l) 
 			else:
 				fname = ''.join(str(upper) for upper in reversed(u)) 
+
+			fname += timestr
 			output_figure(fname)
 
-		d.append([ nLinks_top, 
-				   link_lengths_top,
-				   joint_ranges_top,
+		d.append([ nLinks_top,
+				   u_states[:nLinks_top], 
+				   np.around(link_lengths_top[:nLinks_top], 2),
+				   np.around(joint_ranges_top[:nLinks_top], 2),
 				   nLinks_bottom,
-				   link_lengths_bottom, 
-				   joint_ranges_bottom,
+				   np.around(l_states[:nLinks_bottom], 2),
+				   np.around(link_lengths_bottom[:nLinks_bottom], 2), 
+				   np.around(joint_ranges_bottom[:nLinks_bottom], 2),
 				   0,
 				   0,
-				   end_coordinates,
-				   actuator_length,
-				   actuator_angle
+				   [round(end_coordinates[1][0],2), round(end_coordinates[1][1],2), 
+				   	round(end_coordinates[0][0],2), round(end_coordinates[0][1],2)],
+				   round(actuator_length, 2),
+				   round(actuator_angle, 2)
 				   ])
+
+	# write data to file
+	df = pd.DataFrame(d[1:], columns=d[0])
+	filename = 'data-' + timestr + '.csv'
+	df.to_csv(dirname + filename)
 
 	# Single figure at the end with all configs
 	if single_output_fig:
-		output_figure('all_configs')
+		fname = 'all_configs' + timestr
+		output_figure(fname)
 
-	df = pd.DataFrame(d[1:], columns=d[0])
-	filename = 'data.csv'
-	df.to_csv(dirname + filename)
-	print(df)
+	# df = pd.DataFrame(d[1:], columns=d[0])
+	# filename = 'data-' + timestr + '.csv'
+	# df.to_csv(dirname + filename)
+	#print(df)
 
 
-actuator_assembly(2, 2, start_point = (0.0, 0.0))
+actuator_assembly(nLinks_top = 0, nLinks_bottom = 2)
 
 
