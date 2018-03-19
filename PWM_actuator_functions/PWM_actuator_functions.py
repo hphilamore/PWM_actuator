@@ -18,6 +18,10 @@ def angle_to_Xdatum(P0, P1, L):
 
     print("P0 :", P0)
     print("P1 :", P1)
+    print("P0 :", P0[y])
+    print("P1 :", P1[y])
+    print(float(abs( P1[y] - P0[y] ) / L))
+    print(np.arcsin(float(abs( P1[y] - P0[y] ) / L)))
 
     acute_angle = np.arcsin(float(abs( P1[y] - P0[y] ) / L))
     print("acute angle", acute_angle)
@@ -134,7 +138,9 @@ def bistable_actuator(*, numLinks = 2,
 
     	print()
     	print("link:" , (n+1))
-
+    	print("upper:" , actuator_extends_up)
+    	print(link_states)
+    	
     	# if n == 1:
     	if n == 0:
 
@@ -272,22 +278,26 @@ def bistable_actuator(*, numLinks = 2,
 
 		    #print()
 		    #print("link:" , (n+1))
-		    print("SP:", SP)
-		    print("EP:", EP)
-		    print("arc start:", arc_start)
-		    print("arc end:", arc_end)
-		    print("origin", origin)   
-		    print("joint_angles:", joint_angles)
-		    print("radius", radius)
-		    print("cord angle", cord_angle)
-		    print("j:", j)
-		    print("origin angle", origin_angle)
-		    print("plot start angle", plot_start_angle)
-		    print("plot end angle", plot_end_angle)
+		    ###########################################
+		    # PRINT
+		    ###########################################
+		    # print("SP:", SP)
+		    # print("EP:", EP)
+		    # print("arc start:", arc_start)
+		    # print("arc end:", arc_end)
+		    # print("origin", origin)   
+		    # print("joint_angles:", joint_angles)
+		    # print("radius", radius)
+		    # print("cord angle", cord_angle)
+		    # print("j:", j)
+		    # print("origin angle", origin_angle)
+		    # print("plot start angle", plot_start_angle)
+		    # print("plot end angle", plot_end_angle)
 
-		    print(H)
-		    #print("angle end to x datum:" , arc_start_to_x)
-		    print()
+		    # print(H)
+		    # #print("angle end to x datum:" , arc_start_to_x)
+		    # print()
+		    #############################################
 
 	    	
 

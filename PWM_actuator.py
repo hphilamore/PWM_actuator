@@ -12,26 +12,26 @@ from PWM_actuator_functions.PWM_actuator_functions import *
 # dirname = "../../../Projects/PMW_robot/folder/.file.txt"
 timestr = time.strftime('%Y-%m-%d--%H-%M-%S')
 dirname = '../../../Projects/PMW_robot/' + timestr + '/'
-os.makedirs(os.path.dirname(dirname), exist_ok=True)
+# os.makedirs(os.path.dirname(dirname), exist_ok=True)
 
 # SET PARAMETERS
 #n_top_of_actuator = 4
 #n_bottom_of_actuator = 4
-rad = 19.180
+#rad = 19.180
 #ang = 0.9
-ang = 0.898
+#ang = 0.898
 bi_directional_actuator = True
 single_output_fig = True # True = Single fig at end with all configs, False = New fig each loop 
 
-upper_actuator = [
-				 [1, 1, 1, 1],
-				 [1, 1, 1, 0],
-				 [1, 1, 0, 1],
-				 [1, 1, 0, 0],
-				 [0, 1, 1, 1],
+upper = [
+				 # [1, 1, 1, 1],
+				 # [1, 1, 1, 0],
+				 # [1, 1, 0, 1],
+				 # [1, 1, 0, 0],
+				 # [0, 1, 1, 1],
 				 [0, 1, 1, 0],
-				 [1, 0, 1, 1],
-				 [1, 0, 1, 0]
+				 # [1, 0, 1, 1],
+				 # [1, 0, 1, 0]
 				 ]
 
 				 # [0, 1, 0, 1],
@@ -43,18 +43,18 @@ upper_actuator = [
 				 # ]	
 
 bs = []
-for i in reversed(upper_actuator):
+for i in reversed(upper):
 	bs.append([int(not j) for j in i])
 for i in bs:
-	upper_actuator.append(i)
-print(upper_actuator)
+	upper.append(i)
+print(upper)
 
 
 
 # lower_actuator = []
 # for i in upper_actuator:
 # 	lower_actuator.append([int(not j) for j in i])
-lower_actuator = upper_actuator
+lower = upper
 
 				# [[1, 1, 1, 1],
 				#  [1, 1, 1, 1],
@@ -69,15 +69,13 @@ lower_actuator = upper_actuator
 
 link_lengths_top = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0]
 joint_ranges_top = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3]
-joint_ranges_top = [1, 1, 1, 1, 1, 1, 1, 1]
-joint_ranges_top = [1, 1, 1, 1, 1, 1, 1, 1]
 
 link_lengths_bottom = link_lengths_top
 joint_ranges_bottom = joint_ranges_top
 
-assert len(upper_actuator) == len(lower_actuator), "Fail: The number of actuator sections in each configuration must be the same"
-nlines = len(upper_actuator)
-color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
+# assert len(upper_actuator) == len(lower_actuator), "Fail: The number of actuator sections in each configuration must be the same"
+# nlines = len(upper_actuator)
+# color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
 
 
 # data to store each time the code is run					
@@ -101,6 +99,7 @@ def output_figure(filename):
 		plt.gca().set_aspect(1)
 		# 
 		#filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
+		os.makedirs(os.path.dirname(dirname), exist_ok=True)
 		plt.savefig(dirname + filename + ".pdf", 
 					orientation='portrait', 
 					transparent=False) 
@@ -146,6 +145,12 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 	upper_actuator = list(map(list, itertools.product([0, 1], repeat=nLinks_top)))
 	lower_actuator = list(map(list, itertools.product([0, 1], repeat=nLinks_bottom)))
+	upper_actuator = upper
+	lower_actuator = lower
+	assert len(upper_actuator) == len(lower_actuator), "Fail: The number of actuator sections in each configuration must be the same"
+
+	nlines = len(upper_actuator)
+	color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
 	
 	bidirectional = True if (nLinks_bottom and nLinks_top) else False
 
@@ -216,19 +221,19 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 		# New figure each time code loops
 		if not single_output_fig:
 			if bidirectional:
-				fname = ''.join(str(upper) for upper in reversed(u)) + ''.join(str() for lower in l) 
+				fname = ''.join(str(us) for us in reversed(u_states)) + ''.join(str(ls) for ls in l_states) 
 			# else:
 			# 	fname = ''.join(str(upper) for upper in reversed(u)) 
 			elif nLinks_top and not nLinks_bottom:
-				fname = ''.join(str(upper) for upper in reversed(u))
+				fname = ''.join(str(us) for us in reversed(u_states))
 
 			elif nLinks_top and not nLinks_bottom:
-				fname = ''.join(str() for lower in l)
+				fname = ''.join(str(ls) for ls in l_states)
 
 			else:
-
-			fname += timestr
+				raise ValueError("No links to plot")
 			output_figure(fname)
+			
 
 		d.append([ nLinks_top,
 				   u_states[:nLinks_top], 
@@ -247,16 +252,20 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 				   ])
 
 	# sort data in order of sail angle to y datum
-	d = d.sort(key=lambda x: x[12])
+	# d[1:] = d[1:].sort(key=lambda x: x[12])
+	d[1:] = sorted(d[1:], key=lambda x: x[12])
+
+	linkstr = str(nLinks_top + nLinks_bottom) + 'Links-'
 
 	# write data to file
 	df = pd.DataFrame(d[1:], columns=d[0])
-	filename = 'data-' + timestr + '.csv'
-	df.to_csv(dirname + filename)
+	fname = 'data-' + linkstr + timestr + '.csv'
+	os.makedirs(os.path.dirname(dirname), exist_ok=True)
+	df.to_csv(dirname + fname)
 
 	# Single figure at the end with all configs
 	if single_output_fig:
-		fname = 'all_configs' + timestr
+		fname = 'all_configs-' + linkstr + timestr
 		output_figure(fname)
 
 	# df = pd.DataFrame(d[1:], columns=d[0])
@@ -265,8 +274,12 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	#print(df)
 
 
-actuator_assembly(nLinks_top = 6, nLinks_bottom = 6, 
+# actuator_assembly(nLinks_top = 4, nLinks_bottom = 4, 
+# 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
+# 				  joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3])
+
+actuator_assembly(nLinks_top = 4, nLinks_bottom = 4, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
-				  joint_ranges_top = [pi/6], joint_ranges_bottom = [pi/6])
+				  joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3])
 
 
