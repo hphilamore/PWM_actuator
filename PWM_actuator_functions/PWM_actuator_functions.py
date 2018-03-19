@@ -16,14 +16,15 @@ def angle_to_Xdatum(P0, P1, L):
     x = 0
     y = 1
 
-    print("P0 :", P0)
-    print("P1 :", P1)
-    print("P0 :", P0[y])
-    print("P1 :", P1[y])
-    print(float(abs( P1[y] - P0[y] ) / L))
-    print(np.arcsin(float(abs( P1[y] - P0[y] ) / L)))
+    # Round P0 and P1 to avoid invalid value enter to arcsin
+    P0y = round(P0[y],4)
+    P1y = round(P1[y],4)
+    # P1[y] = round(P1[y],4)
+    # print(float(abs( P1[y] - P0[y] ) / L))
+    # print(np.arcsin(float(abs( P1[y] - P0[y] ) / L)))
 
-    acute_angle = np.arcsin(float(abs( P1[y] - P0[y] ) / L))
+    #acute_angle = np.arcsin(float(abs( P1[y] - P0[y] ) / L))
+    acute_angle = np.arcsin(float(abs( P1y - P0y ) / L))
     print("acute angle", acute_angle)
 
     # if   ((P1[x] > P0[x]) & (P1[y] > P0[y])): angle = acute_angle # print("Q1")
@@ -51,7 +52,12 @@ def angle_to_Ydatum(P0, P1, L):
     x = 0
     y = 1
 
-    acute_angle = np.arcsin(float(abs( P1[x] - P0[x] ) / L))
+    # Round P0 and P1 to avoid invalid value enter to arcsin
+    P0x = round(P0[x],4)
+    P1x = round(P1[x],4)
+
+    # acute_angle = np.arcsin(float(abs( P1[x] - P0[x] ) / L))
+    acute_angle = np.arcsin(float(abs( P1x - P0x ) / L))
     print("acute angle", acute_angle)
 
     # if   ((P1[x] > P0[x]) & (P1[y] > P0[y])): angle = acute_angle # print("Q1")
