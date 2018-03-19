@@ -12,7 +12,7 @@ import sympy as sp
 def angle_to_Xdatum(P0, P1, L):
 	# TODO : L should be calculated from points P0 and P1 to avoid error
 	# assert can be used to check answer if desired
-    "Returns angle that the line P0-P1 (length = L) makes with the x (horizontal) datum at P0."
+    "Returns angle that the line P0-P1 (length = L) makes with the x (horizontal) datum."
     x = 0
     y = 1
 
@@ -35,6 +35,31 @@ def angle_to_Xdatum(P0, P1, L):
     # quadrant = np.empty((2))
     # quadrant[x] = 1 if (ep[x] > sp[x]) else 0
     # quadrant[y] = 1 if (ep[y] > sp[y]) else 0
+
+
+def angle_to_Ydatum(P0, P1, L):
+	# TODO : L should be calculated from points P0 and P1 to avoid error
+	# assert can be used to check answer if desired
+    "Returns ACUTE angle (+ve, -ve) that the line P0-P1 (length = L) makes with the y (horizontal) datum."
+    x = 0
+    y = 1
+
+    acute_angle = np.arcsin(float(abs( P1[x] - P0[x] ) / L))
+    print("acute angle", acute_angle)
+
+    # if   ((P1[x] > P0[x]) & (P1[y] > P0[y])): angle = acute_angle # print("Q1")
+    # elif ((P1[x] < P0[x]) & (P1[y] > P0[y])): angle = pi - acute_angle#, print("Q2")
+    # elif ((P1[x] < P0[x]) & (P1[y] < P0[y])): angle = pi + acute_angle#, print("Q3")
+    # else:                                     angle = 2 * pi - acute_angle#, print("Q4")
+
+    angle = acute_angle if (P0[x] >= P1[x]) else (-acute_angle)# print("Q1")
+    # elif ((P0[x] > P1[x])  & (P0[y] <= P1[y])): angle = pi - acute_angle#, print("Q2")
+    # elif ((P0[x] > P1[x])  & (P0[y] > P1[y])):  angle = pi + acute_angle#, print("Q3")
+    # else: 				 angle = 2 * pi - acute_angle#, print("Q4")
+
+       
+    print("angle =", angle) 
+    return angle
 
 
 

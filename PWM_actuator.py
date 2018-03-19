@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import time
 import pandas as pd
+import itertools
 
 import PWM_actuator_functions.PWM_actuator_functions
 from PWM_actuator_functions.PWM_actuator_functions import *
@@ -68,6 +69,9 @@ lower_actuator = upper_actuator
 
 link_lengths_top = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0]
 joint_ranges_top = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3]
+joint_ranges_top = [1, 1, 1, 1, 1, 1, 1, 1]
+joint_ranges_top = [1, 1, 1, 1, 1, 1, 1, 1]
+
 link_lengths_bottom = link_lengths_top
 joint_ranges_bottom = joint_ranges_top
 
@@ -103,8 +107,30 @@ def output_figure(filename):
 		plt.show()
 
 
-def actuator_assembly(*, nLinks_top, nLinks_bottom, start_point = (0.0, 0.0)):
+
+link_lengths_top = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0]
+joint_ranges_top = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3]
+joint_ranges_top = [1, 1, 1, 1, 1, 1, 1, 1]
+joint_ranges_top = [1, 1, 1, 1, 1, 1, 1, 1]
+
+link_lengths_bottom = link_lengths_top
+joint_ranges_bottom = joint_ranges_top
+
+
+
+def actuator_assembly(*, nLinks_top, nLinks_bottom, 
+						 link_lengths_top = [27.0], link_lengths_bottom = [27.0],
+						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
+						 start_point = (0.0, 0.0)):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
+
+	if (len(link_lengths_top)==1)    : link_lengths_top *= nLinks_top 
+	if (len(joint_ranges_top)==1)    : joint_ranges_top *= nLinks_top
+	if (len(link_lengths_bottom)==1) : link_lengths_bottom *= nLinks_top
+	if (len(joint_ranges_bottom)==1) : joint_ranges_bottom *= nLinks_top 
+
+	upper_actuator = list(map(list, itertools.product([0, 1], repeat=nLinks_top)))
+	lower_actuator = list(map(list, itertools.product([0, 1], repeat=nLinks_bottom)))
 	
 	bidirectional = True if (nLinks_bottom and nLinks_top) else False
 
@@ -142,7 +168,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom, start_point = (0.0, 0.0)):
 			if nLinks_top:
 				end_coordinates = [tip_upper, start_point]
 			else: 
-				end_coordinates = [tip_lower, start_point]
+				end_coordinates = [start_point, tip_lower]
 
 
 
@@ -154,7 +180,8 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom, start_point = (0.0, 0.0)):
 		# angle_to_Xdatum = angle_to_Xdatum(B[2], A[2], actuator_length)
 
 
-		actuator_angle = angle_to_Xdatum(end_coordinates[1], end_coordinates[0], actuator_length)
+		# actuator_angle = angle_to_Xdatum(end_coordinates[1], end_coordinates[0], actuator_length)
+		actuator_angle = angle_to_Ydatum(end_coordinates[1], end_coordinates[0], actuator_length)
 		print(actuator_angle)
 
 
@@ -197,6 +224,9 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom, start_point = (0.0, 0.0)):
 				   round(actuator_angle, 2)
 				   ])
 
+	# sort data in order of sail angle to y datum
+	d = d.sort(key=lambda x: x[12])
+
 	# write data to file
 	df = pd.DataFrame(d[1:], columns=d[0])
 	filename = 'data-' + timestr + '.csv'
@@ -213,6 +243,8 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom, start_point = (0.0, 0.0)):
 	#print(df)
 
 
-actuator_assembly(nLinks_top = 0, nLinks_bottom = 2)
+actuator_assembly(nLinks_top = 8, nLinks_bottom = 8, 
+				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
+				  joint_ranges_top = [pi/6], joint_ranges_bottom = [pi/6])
 
 
