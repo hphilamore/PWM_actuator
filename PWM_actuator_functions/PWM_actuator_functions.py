@@ -16,6 +16,9 @@ def angle_to_Xdatum(P0, P1, L):
     x = 0
     y = 1
 
+    print("P0 :", P0)
+    print("P1 :", P1)
+
     acute_angle = np.arcsin(float(abs( P1[y] - P0[y] ) / L))
     print("acute angle", acute_angle)
 

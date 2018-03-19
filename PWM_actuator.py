@@ -81,20 +81,20 @@ color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
 
 
 # data to store each time the code is run					
-d = []
-d.append(['nLinks_top',
-		  'link_states_top',
-		  'link_lengths_top',
-		  'joint_ranges_top',
-		  'nLinks_bottom',
-		  'link_states_bottom',
-		  'link_lengths_bottom',
-		  'joint_ranges_bottom',
-		  'link_offset',
-		  'link_twist',
-	 	  'end_coordinates',
-	 	  'end_to_end_length', 
-	 	  'end_to_end_angle'])
+# d = []
+# d.append(['nLinks_top',
+# 		  'link_states_top',
+# 		  'link_lengths_top',
+# 		  'joint_ranges_top',
+# 		  'nLinks_bottom',
+# 		  'link_states_bottom',
+# 		  'link_lengths_bottom',
+# 		  'joint_ranges_bottom',
+# 		  'link_offset',
+# 		  'link_twist',
+# 	 	  'end_coordinates',
+# 	 	  'end_to_end_length', 
+# 	 	  'end_to_end_angle'])
 
 def output_figure(filename):
 		plt.axis('equal')
@@ -108,8 +108,8 @@ def output_figure(filename):
 
 
 
-link_lengths_top = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0]
-joint_ranges_top = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3]
+link_lengths_top = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0]
+joint_ranges_top = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3]
 joint_ranges_top = [1, 1, 1, 1, 1, 1, 1, 1]
 joint_ranges_top = [1, 1, 1, 1, 1, 1, 1, 1]
 
@@ -123,6 +123,21 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
 						 start_point = (0.0, 0.0)):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
+
+	d = []
+	d.append(['nLinks_top',
+			  'link_states_top',
+			  'link_lengths_top',
+			  'joint_ranges_top',
+			  'nLinks_bottom',
+			  'link_states_bottom',
+			  'link_lengths_bottom',
+			  'joint_ranges_bottom',
+			  'link_offset',
+			  'link_twist',
+		 	  'end_coordinates',
+		 	  'end_to_end_length', 
+		 	  'end_to_end_angle'])
 
 	if (len(link_lengths_top)==1)    : link_lengths_top *= nLinks_top 
 	if (len(joint_ranges_top)==1)    : joint_ranges_top *= nLinks_top
@@ -202,8 +217,15 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 		if not single_output_fig:
 			if bidirectional:
 				fname = ''.join(str(upper) for upper in reversed(u)) + ''.join(str() for lower in l) 
+			# else:
+			# 	fname = ''.join(str(upper) for upper in reversed(u)) 
+			elif nLinks_top and not nLinks_bottom:
+				fname = ''.join(str(upper) for upper in reversed(u))
+
+			elif nLinks_top and not nLinks_bottom:
+				fname = ''.join(str() for lower in l)
+
 			else:
-				fname = ''.join(str(upper) for upper in reversed(u)) 
 
 			fname += timestr
 			output_figure(fname)
@@ -243,7 +265,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	#print(df)
 
 
-actuator_assembly(nLinks_top = 8, nLinks_bottom = 8, 
+actuator_assembly(nLinks_top = 6, nLinks_bottom = 6, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 				  joint_ranges_top = [pi/6], joint_ranges_bottom = [pi/6])
 
