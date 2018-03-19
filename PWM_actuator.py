@@ -14,15 +14,15 @@ dirname = '../../../Projects/PMW_robot/' + timestr + '/'
 os.makedirs(os.path.dirname(dirname), exist_ok=True)
 
 # SET PARAMETERS
-n_base_sections = 4
-n_additional_sections = 4
+#n_top_of_actuator = 4
+#n_bottom_of_actuator = 4
 rad = 19.180
 #ang = 0.9
 ang = 0.898
 bi_directional_actuator = True
 single_output_fig = True # True = Single fig at end with all configs, False = New fig each loop 
 
-base_sections = [
+upper_actuator = [
 				 [1, 1, 1, 1],
 				 [1, 1, 1, 0],
 				 [1, 1, 0, 1],
@@ -42,17 +42,17 @@ base_sections = [
 				 # ]	
 
 bs = []
-for i in reversed(base_sections):
+for i in reversed(upper_actuator):
 	bs.append([int(not j) for j in i])
 for i in bs:
-	base_sections.append(i)
-print(base_sections)
+	upper_actuator.append(i)
+print(upper_actuator)
 
 
 
-additional_sections = []
-for i in base_sections:
-	additional_sections.append([int(not j) for j in i])
+lower_actuator = []
+for i in upper_actuator:
+	lower_actuator.append([int(not j) for j in i])
 
 				# [[1, 1, 1, 1],
 				#  [1, 1, 1, 1],
@@ -65,8 +65,31 @@ for i in base_sections:
 				#  [1, 1, 1, 1],
 				#  [1, 1, 1, 1]]
 
-# BL = [1, 0, 1, 1, 0 ,0 ,1]
-# BL = [1, 0, 1, 0, 0 , 1 ,0]
+link_lengths_top = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0]
+joint_ranges_top = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3]
+link_lengths_bottom = link_lengths_top
+joint_ranges_bottom = joint_ranges_top
+
+assert len(upper_actuator) == len(lower_actuator), "Fail: The number of actuator sections in each configuration must be the same"
+nlines = len(upper_actuator)
+color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
+
+
+# data to store each time the code is run					
+d = []
+d.append(['nLinks_top',
+		  'link_states_top',
+		  'link_lengths_top',
+		  'joint_ranges_top',
+		  'nLinks_bottom',
+		  'link_states_bottom',
+		  'link_lengths_bottom',
+		  'joint_ranges_bottom',
+		  'link_offset',
+		  'link_twist',
+	 	  'end_coordinates',
+	 	  'end_to_end_length', 
+	 	  'end_to_end_angle'])
 
 def output_figure(filename):
 		plt.axis('equal')
@@ -79,128 +102,100 @@ def output_figure(filename):
 		plt.show()
 
 
+def actuator_assembly(nLinks_top, nLinks_bottom, start_point = (0.0, 0.0)):
+	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
+	
+	bidirectional = True if nLinks_bottom else False
 
-assert len(base_sections) == len(additional_sections), "Fail: The number of actuator sections in each configuration must be the same"
-#color=iter(plt.cm.rainbow(np.linspace(0,1,len(base_sections))))
-nlines = len(base_sections)
-#colour_idx = np.linspace(0, 1, n_lines)
-color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
-					
-d = []
-d.append(['radius', 
-	 'arc_angle', 
-	 'series', 
-	 'n_base',
-	 'n_addtnl',
-	 'end_coordinates',
-	 'end_to_end_length', 
-	 'end_to_end_angle'])
+	for u, l in zip(upper_actuator, lower_actuator):
 
+		c=next(color)
 
-
-# TODO : OOP
-# TODO : encapsulate in function
-
-for b, a in zip(base_sections, additional_sections):
-
-	c=next(color)
-
-	B = actuator_1way_series(n_base_sections, 
-							 radius = rad,
-							 arc_angle = ang, 
-							 set_plot_colour = True,	
-							 plot_colour = c,	
-							 actuator_base = True, 
-							 base_links = b)
-
-	if bi_directional_actuator:
-		A = actuator_1way_series(n_additional_sections, 
-			                     radius = rad,
-								 arc_angle = ang,
-								 set_plot_colour = True,
-								 plot_colour = c,
-			                     actuator_base = False, 
-			                     base_links = b, 
-			                     addtnl_links = a, 
-			                     )
-
-	if bi_directional_actuator:
-		series = b + a 
-		end_coordinates = np.array([B[2], A[2]])
-	else:
-		series = b
-		end_coordinates = np.array([B[2], np.array([0.0, 0.0])])
+		direction_up = True
+		tip_upper = bistable_actuator(numLinks = nLinks_top,
+		                  			  actuator_extends_up = direction_up, # False = fixed at top of actuator
+					                  	link1_fixed_fixed = True, # False = link1_fixed_free
+					                  	link_states = u, 
+					                  	link_lengths = link_lengths_top,
+					                  	joint_ranges = joint_ranges_top,
+					                  	draw_actuator = True,
+					                  	set_plot_colour = True,
+					                  	plot_colour = c)
 
 
-	actuator_length = np.sqrt((end_coordinates[0][0] - end_coordinates[1][0])**2 + 
-		                      (end_coordinates[0][1] - end_coordinates[1][1])**2)
+		if bidirectional:
+			tip_lower = bistable_actuator(numLinks = nLinks_bottom,
+			                  			  actuator_extends_up = not direction_up, # False = fixed at top of actuator
+			                  				   link1_fixed_fixed = True, # False = link1_fixed_free
+			                  				   link_states = l, 
+			                  				   link_lengths = link_lengths_bottom,
+			                                   joint_ranges = joint_ranges_bottom,
+			                                   draw_actuator = True,
+			                                   set_plot_colour = True,
+			                                   plot_colour = c)
 
-	###################################
-	# TODO: replace with imported function that does exactly the same but isn't working for an unknown reason
-	# angle_to_Xdatum = angle_to_Xdatum(B[2], A[2], actuator_length)
-	x = 0
-	y = 1
-	point = B[2]
-	origin = A[2] if bi_directional_actuator else np.array([0.0, 0.0])
-	acute_angle = np.arcsin(abs( origin[y] - point[y] ) / actuator_length)
-	quadrant = np.empty((2))
-	quadrant[x] = 1 if (point[x] > origin[x]) else 0
-	quadrant[y] = 1 if (point[y] > origin[y]) else 0
-	if np.allclose(quadrant,  np.array([1, 1])):   angle = acute_angle
-	elif np.allclose(quadrant,  np.array([0, 1])): angle = pi - acute_angle
-	elif np.allclose(quadrant,  np.array([0, 0])): angle = pi + acute_angle
-	else:                                          angle = 2 * pi - acute_angle
-	angle_to_Xdatum = angle
-	###################################
 
-	# New figure each time code loops
-	if not single_output_fig:
-		if bi_directional_actuator:
-			fname = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) 
+			end_coordinates = [tip_upper, tip_lower]
 		else:
-			fname = ''.join(str(bb) for bb in b) 
-		output_figure(fname)
-
-		# plt.xlim(0, 40)
-		# plt.ylim(0, 40)
-		# plt.axis('equal')
-		# filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
-		# plt.savefig(dirname + filename, 
-		# 			orientation='portrait', 
-		# 			transparent=False) 
-		# plt.show()
-
-	d.append([ rad, 
-			   ang,
-			   series,
-			   n_base_sections, 
-			   n_additional_sections,
-			   end_coordinates,
-			   # [[np.round(end_coordinates[0][0],2), np.round(end_coordinates[0][1],2)]
-			   # 	[np.round(end_coordinates[1][0],2), np.round(end_coordinates[1][1],2)]],	
-			   np.round(actuator_length, 2),
-			   np.round(angle_to_Xdatum, 2)
-			   ])
-
-# Single figure at the end with all configs
-if single_output_fig:
-	output_figure('all_configs')
-	# plt.xlim(0, 40)
-	# plt.ylim(0, 40)
-	# plt.axis('equal')
-	# filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
-	# plt.savefig(dirname + filename, 
-	# 			orientation='portrait', 
-	# 			transparent=False) 
-	# plt.show()
+			end_coordinates = [tip_upper, start_point]
 
 
-df = pd.DataFrame(d[1:], columns=d[0])
-filename = 'data.csv'
-df.to_csv(dirname + filename)
-print(df)
+		actuator_length = np.sqrt(float((end_coordinates[0][0] - end_coordinates[1][0])**2 + 
+			                      (end_coordinates[0][1] - end_coordinates[1][1])**2))
+
+		###################################
+		# TODO: replace with imported function that does exactly the same but isn't working for an unknown reason
+		# angle_to_Xdatum = angle_to_Xdatum(B[2], A[2], actuator_length)
 
 
+		actuator_angle = angle_to_Xdatum(end_coordinates[1], end_coordinates[0], actuator_length)
+		print(actuator_angle)
 
+
+		# point = B[2]
+		# origin = A[2] if bi_directional_actuator else np.array([0.0, 0.0])
+		# acute_angle = np.arcsin(abs( origin[y] - point[y] ) / actuator_length)
+		# quadrant = np.empty((2))
+		# quadrant[x] = 1 if (point[x] > origin[x]) else 0
+		# quadrant[y] = 1 if (point[y] > origin[y]) else 0
+		# if np.allclose(quadrant,  np.array([1, 1])):   angle = acute_angle
+		# elif np.allclose(quadrant,  np.array([0, 1])): angle = pi - acute_angle
+		# elif np.allclose(quadrant,  np.array([0, 0])): angle = pi + acute_angle
+		# else:                                          angle = 2 * pi - acute_angle
+		# angle_to_Xdatum = angle
+		# ###################################
+
+		# New figure each time code loops
+		if not single_output_fig:
+			if bidirectional:
+				fname = ''.join(str(upper) for upper in reversed(u)) + ''.join(str() for lower in l) 
+			else:
+				fname = ''.join(str(upper) for upper in reversed(u)) 
+			output_figure(fname)
+
+		d.append([ nLinks_top, 
+				   link_lengths_top,
+				   joint_ranges_top,
+				   nLinks_bottom,
+				   link_lengths_bottom, 
+				   joint_ranges_bottom,
+				   0,
+				   0,
+				   end_coordinates,
+				   actuator_length,
+				   actuator_angle
+				   ])
+
+	# Single figure at the end with all configs
+	if single_output_fig:
+		output_figure('all_configs')
+
+	df = pd.DataFrame(d[1:], columns=d[0])
+	filename = 'data.csv'
+	df.to_csv(dirname + filename)
+	print(df)
+
+
+actuator_assembly(2, 2, start_point = (0.0, 0.0))
 
 

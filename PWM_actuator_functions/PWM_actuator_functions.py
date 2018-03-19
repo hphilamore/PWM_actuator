@@ -7,11 +7,11 @@ import sympy as sp
 # init_vprinting(use_latex='mathjax', pretty_print=False)
 #from sympy.physics.mechanics import dynamicsymbols, Point, ReferenceFrame
 
-# bi-state 0 = bend to left --> draw link by moving through NEGATIVE angular displacement in regular cartesion FOR
-# bi_state 1 = bend to right --> draw link by moving through POSITIVE angular displacement in regular cartesian FOR
-# COA = central point of actuator 
+
 
 def angle_to_Xdatum(P0, P1, L):
+	# TODO : L should be calculated from points P0 and P1 to avoid error
+	# assert can be used to check answer if desired
     "Returns angle that the line P0-P1 (length = L) makes with the x (horizontal) datum at P0."
     x = 0
     y = 1
@@ -40,12 +40,12 @@ def angle_to_Xdatum(P0, P1, L):
 
       
     
-def plot_bistable_actuator(numLinks,
-                         *, 
+def bistable_actuator(*, numLinks = 2,
+                         #*, 
                          actuator_extends_up = False, # False = fixed at top of actuator
                          link1_fixed_fixed = True, # False = link1_fixed_free
                          start_point = (0,0),
-                         radius = 27, 
+                         #radius = 27, 
                          link_states = [1, 1, 0, 1, 0, 1 ,0], 
                          link_lengths = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0],
                          joint_ranges = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3],
@@ -76,20 +76,9 @@ def plot_bistable_actuator(numLinks,
     theta, a, alpha, d = sp.symbols('theta, a, alpha, d')
     theta, a, alpha, d
 
-    if actuator_extends_up:
-    	rot = sp.Matrix([[sp.cos(theta), -sp.sin(theta), 0], 
-    		             [sp.sin(theta),  sp.cos(theta), 0], 
-    		             [0,              0,             1]])
-    else:
-    	rot = sp.Matrix([[sp.cos(theta),  -sp.sin(theta), 0], 
-    		             [sp.sin(theta),  sp.cos(theta), 0], 
-    		             [0,               0,             1]])
-	    # rot = sp.Matrix([[sp.cos(theta), -sp.sin(theta), 0],
-	    # 				 [sp.sin(theta),  sp.cos(theta), 0],
-	    # 				 [0,              0,             1]])
-
-	#rot = sp.Matrix([[sp.cos(theta), -sp.sin(theta), 0], [sp.sin(theta),  sp.cos(theta), 0], [0,              0,             1]])
-
+    rot = sp.Matrix([[sp.cos(theta), -sp.sin(theta), 0], 
+		             [sp.sin(theta),  sp.cos(theta), 0], 
+		             [0,              0,             1]])
 
 
     trans = sp.Matrix([a * sp.cos(theta),
@@ -178,6 +167,7 @@ def plot_bistable_actuator(numLinks,
 		    
 
 		    origin_angle = cord_angle + (j if bend_CCW else (-j))
+
 		    origin = (arc_start[x] + radius * np.cos(origin_angle),
 		    		  arc_start[y] + radius * np.sin(origin_angle))
 
@@ -299,14 +289,14 @@ def plot_bistable_actuator(numLinks,
 
     #plt.axis('equal')
 	
-    plt.show()
+    #plt.show()
 
     return EP
 
     
 
-EP = plot_bistable_actuator(5)           
-print(EP)
+#EP = bistable_actuator(numLinks = 5)           
+#print(EP)
 
 
 
