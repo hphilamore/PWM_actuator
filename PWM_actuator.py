@@ -12,7 +12,7 @@ from PWM_actuator_functions.PWM_actuator_functions import *
 
 # dirname = "../../../Projects/PMW_robot/folder/.file.txt"
 timestr = time.strftime('%Y-%m-%d--%H-%M-%S')
-dirname = '../../../Projects/PMW_robot/' + timestr + '/'
+dirname = '../../../Projects/PMW_robot/simulation_results/' + timestr + '/'
 os.makedirs(os.path.dirname(dirname), exist_ok=True)
 
 # SET PARAMETERS
