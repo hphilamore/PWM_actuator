@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import os
 import time
 import pandas as pd
+import itertools
 
 import PWM_actuator_functions.PWM_actuator_functions
 from PWM_actuator_functions.PWM_actuator_functions import *
@@ -15,11 +16,11 @@ dirname = '../../../Projects/PMW_robot/' + timestr + '/'
 os.makedirs(os.path.dirname(dirname), exist_ok=True)
 
 # SET PARAMETERS
-n_base_sections = 4
-n_additional_sections = 4
-rad = 19.180
+n_base_sections = 8
+n_additional_sections = 8
+rad = 20
 #ang = 0.9
-ang = 0.898
+ang = pi/6
 bi_directional_actuator = True
 single_output_fig = True # True = Single fig at end with all configs, False = New fig each loop 
 
@@ -68,6 +69,11 @@ for i in base_sections:
 
 # BL = [1, 0, 1, 1, 0 ,0 ,1]
 # BL = [1, 0, 1, 0, 0 , 1 ,0]
+
+
+
+base_sections = list(map(list, itertools.product([0, 1], repeat=8)))
+additional_sections = list(map(list, itertools.product([0, 1], repeat=8)))
 
 def output_figure(filename):
 		plt.axis('equal')
