@@ -132,6 +132,7 @@ def bistable_actuator(*, numLinks = 2,
     joint_angles = []
 
 
+
     # for n, (state, joint_range, length) in enumerate(zip(link_states, joint_ranges, link_lengths), 1):
     for n, (state, joint_range, length, ai, ti) in enumerate(zip(link_states[:numLinks], 
     															 joint_ranges[:numLinks], 
@@ -255,6 +256,11 @@ def bistable_actuator(*, numLinks = 2,
 		                    origin[y] + radius * np.sin(arc_points)])
 
 
+		    # complile a single array of all points plotted to use for convex hull
+		    if n == 0:
+		    	all_arc_points = arc
+		    else:
+		    	all_arc_points = np.hstack((all_arc_points, arc))
 
 		    # draw arc
 		    # # PLOT: 
@@ -264,6 +270,9 @@ def bistable_actuator(*, numLinks = 2,
 		    	plt.plot(arc[x], arc[y], c=plot_colour)  
 		    else:
 		    	plt.plot(arc[x], arc[y])
+
+    	else:
+    		all_arc_points = None
 
 		    # plt.plot(origin[x], origin[y], 'co')
 		    # plt.plot(arc[x, 0], arc[y, 0], 'ro')
@@ -308,6 +317,7 @@ def bistable_actuator(*, numLinks = 2,
 		    # print()
 		    #############################################
 
+			
 	    	
 
     # simplify terms of matrix
@@ -338,7 +348,7 @@ def bistable_actuator(*, numLinks = 2,
 	
     #plt.show()
 
-    return EP
+    return EP, all_arc_points
 
     
 

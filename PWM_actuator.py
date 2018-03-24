@@ -1,6 +1,7 @@
 import numpy as np
 from numpy import pi as pi
 import matplotlib.pyplot as plt
+from scipy.spatial import ConvexHull
 import os
 import time
 import pandas as pd
@@ -116,6 +117,29 @@ def output_figure(filename):
 		plt.show()
 
 
+def split(u, v, points):
+    # return points on left side of UV
+    return [p for p in points if np.cross(p - u, v - u) < 0]
+
+def extend(u, v, points):
+    if not points:
+        return []
+
+    # find furthest point W, and split search to WV, UW
+    w = min(points, key=lambda p: np.cross(p - u, v - u))
+    p1, p2 = split(w, v, points), split(u, w, points)
+    return extend(w, v, p1) + [w] + extend(u, w, p2)
+
+def convex_hull(points):
+    # find two hull points, U, V, and split to left and right search
+    u = min(points, key=lambda p: p[0])
+    v = max(points, key=lambda p: p[0])
+    left, right = split(u, v, points), split(v, u, points)
+
+    # find convex hull on each side
+    return [v] + extend(u, v, left) + [u] + extend(v, u, right) + [v]
+
+
 
 link_lengths_top = [27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0, 27.0]
 joint_ranges_top = [pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3, pi/3]
@@ -131,7 +155,8 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 						 link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
 						 start_point = (0.0, 0.0),  
-						 plot_crest = True, single_output_fig = True):
+						 plot_crest = True, plot_convex_hull = True,
+						 single_output_fig = True):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
 
 	d = []
@@ -182,7 +207,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 		direction_up = True
 		if nLinks_top:
-			tip_upper = bistable_actuator(numLinks = nLinks_top,
+			tip_upper, plotted_points_upper = bistable_actuator(numLinks = nLinks_top,
 			                  			  actuator_extends_up = True, # False = fixed at top of actuator
 						                  	link1_fixed_fixed = True, # False = link1_fixed_free
 						                  	link_states = u_states, 
@@ -194,7 +219,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 
 		if nLinks_bottom:
-			tip_lower = bistable_actuator(numLinks = nLinks_bottom,
+			tip_lower, plotted_points_lower = bistable_actuator(numLinks = nLinks_bottom,
 			                  			  actuator_extends_up = False, # False = fixed at top of actuator
 			                  				   link1_fixed_fixed = True, # False = link1_fixed_free
 			                  				   link_states = l_states, 
@@ -217,6 +242,43 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			plt.plot([end_coordinates[0][x], end_coordinates[1][x]], 
 					 [end_coordinates[0][y], end_coordinates[1][y]], 
 					 c=col, linestyle='--', linewidth=0.5)
+
+		if plot_convex_hull:
+			plotted_points = np.hstack((plotted_points_upper, plotted_points_lower))
+			print(type(plotted_points))
+			print(plotted_points.shape)
+			plotted_points = plotted_points.transpose()
+
+			print(plotted_points.shape)
+			print(plotted_points)
+			print()
+			#plotted_points.transpose
+
+			#print(plotted_points.shape)
+			# print(plotted_points[0][0:3])
+			# print(plotted_points[1][0:3])
+			# print(plotted_points[0:2, 0:3])
+			# points = plotted_points[0:2, 0:100]
+			plt.plot(plotted_points[0], plotted_points[1], 'ro')
+			# find two hull points, U, V, and split to left and right search
+			u = min(plotted_points, key=lambda p: p[0])
+			print()
+
+			v = max(plotted_points, key=lambda p: p[0])
+			print(u)
+			print(v)
+
+			
+		    
+		    
+			#hull = np.array(convex_hull(plotted_points))
+			
+			hull = ConvexHull(plotted_points)
+
+			plt.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], 'k', alpha=0.3)
+
+			for simplex in hull.simplices:
+				plt.plot(plotted_points[simplex, 0], plotted_points[simplex, 1], 'k-')
 
 
 
