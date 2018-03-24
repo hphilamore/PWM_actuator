@@ -265,11 +265,11 @@ def bistable_actuator(*, numLinks = 2,
 		    else:
 		    	plt.plot(arc[x], arc[y])
 
-		    plt.plot(origin[x], origin[y], 'co')
-		    plt.plot(arc[x, 0], arc[y, 0], 'ro')
-		    plt.plot(arc_start[x], arc_start[y], 'g^')
-		    plt.plot(arc[x, -1], arc[y, -1], 'bo')
-		    plt.plot(arc_end[x], arc_end[y], 'm^')
+		    # plt.plot(origin[x], origin[y], 'co')
+		    # plt.plot(arc[x, 0], arc[y, 0], 'ro')
+		    # plt.plot(arc_start[x], arc_start[y], 'g^')
+		    # plt.plot(arc[x, -1], arc[y, -1], 'bo')
+		    # plt.plot(arc_end[x], arc_end[y], 'm^')
 
 		    # # start point
 		    # if n == 0: 	

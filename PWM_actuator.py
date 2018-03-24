@@ -21,6 +21,9 @@ delta_1 = 0
 delta_2 = 0
 delta_3 = 0
 
+x = 0
+y = 1
+
 # SET PARAMETERS
 #n_top_of_actuator = 4
 #n_bottom_of_actuator = 4
@@ -127,7 +130,8 @@ joint_ranges_bottom = joint_ranges_top
 def actuator_assembly(*, nLinks_top, nLinks_bottom, 
 						 link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
-						 start_point = (0.0, 0.0),  single_output_fig = True):
+						 start_point = (0.0, 0.0),  
+						 plot_crest = True, single_output_fig = True):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
 
 	d = []
@@ -159,7 +163,12 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	# lower_actuator = lower
 	
 	nlines = len(upper_actuator)
-	color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
+	# color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
+	color=iter(plt.cm.binary(np.linspace(0.2, 1, nlines)))
+
+
+	#, vmin=0, vmax=20
+
 
 	if (nLinks_bottom and nLinks_top):
 		bidirectional = True 
@@ -169,7 +178,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 	for u_states, l_states in itertools.zip_longest(upper_actuator, lower_actuator):
 
-		c=next(color)
+		col=next(color)
 
 		direction_up = True
 		if nLinks_top:
@@ -181,7 +190,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 						                  	joint_ranges = joint_ranges_top,
 						                  	draw_actuator = True,
 						                  	set_plot_colour = True,
-						                  	plot_colour = c)
+						                  	plot_colour = col)
 
 
 		if nLinks_bottom:
@@ -193,7 +202,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			                                   joint_ranges = joint_ranges_bottom,
 			                                   draw_actuator = True,
 			                                   set_plot_colour = True,
-			                                   plot_colour = c)
+			                                   plot_colour = col)
 
 		if bidirectional:
 			end_coordinates = [tip_upper, tip_lower]
@@ -204,9 +213,15 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 				end_coordinates = [start_point, tip_lower]
 
 
+		if plot_crest:
+			plt.plot([end_coordinates[0][x], end_coordinates[1][x]], 
+					 [end_coordinates[0][y], end_coordinates[1][y]], 
+					 c=col, linestyle='--', linewidth=0.5)
 
-		actuator_length = np.sqrt(float((end_coordinates[0][0] - end_coordinates[1][0])**2 + 
-			                      (end_coordinates[0][1] - end_coordinates[1][1])**2))
+
+
+		actuator_length = np.sqrt(float((end_coordinates[0][x] - end_coordinates[1][x])**2 + 
+			                      (end_coordinates[0][y] - end_coordinates[1][y])**2))
 
 		###################################
 		# TODO: replace with imported function that does exactly the same but isn't working for an unknown reason
@@ -268,13 +283,58 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	# d[1:] = d[1:].sort(key=lambda x: x[12])
 	d[1:] = sorted(d[1:], key=lambda x: x[12])
 
+	
+
+	# angular difference between each position
+	#f = [[y for y in x] for x in l]
+	#f = [[i for i,j in zip(di, d[0]) if j == 'end_to_end_angle'] for di in d[1:]]
+
+	# f = [i for i,j in zip(d[1], d[0]) if j == 'end_to_end_angle']
+	# # https://stackoverflow.com/questions/18072759/list-comprehension-on-a-nested-list
+	# list_ang = [i for di in d[1:] for i, j in zip(di, d[0]) if j == 'end_to_end_angle'] 
+	#print("list ang =", f)
+
+	#list_ang = [i[-1] for i in d[1:]]
+	# print("list ang =", list_ang)
+	# diff_ang = [abs(j-i) for i,j in zip(list_ang, list_ang[1:])] 
+	# mean_diff_ang = np.mean(diff_ang)
+	# SD_diff_ang = np.std(diff_ang)
+	# var_diff_ang = np.var(diff_ang)
+	# print(list_ang)
+
+	# print(diff_ang, mean_diff_ang, var_diff_ang, SD_diff_ang)
+
 	linkstr = str(nLinks_top + nLinks_bottom) + 'Links-'
 
 	# write data to file
 	df = pd.DataFrame(d[1:], columns=d[0])
+	# new_column = df['end_to_end_angle'] + 1
+	# df['mean_diff_ang'] = new_column
+	# df['mean_diff_ang'][1] = mean_diff_ang
+
+
 	fname = 'data-' + linkstr + timestr + '.csv'
 	os.makedirs(os.path.dirname(dirname), exist_ok=True)
 	df.to_csv(dirname + fname)
+
+	# add data from analysing data for all configs
+	# https://stackoverflow.com/questions/18072759/list-comprehension-on-a-nested-list
+	list_ang = [i for di in d[1:] for i, j in zip(di, d[0]) if j == 'end_to_end_angle'] 
+	diff_ang = [abs(j-i) for i,j in zip(list_ang, list_ang[1:])] 
+	mean_diff_ang = np.mean(diff_ang)
+	SD_diff_ang = np.std(diff_ang)
+	var_diff_ang = np.var(diff_ang)
+
+	#diff_ang.append(None)
+	diff_ang.insert(0, None)
+
+	df = pd.read_csv(dirname + fname)
+	df['diff_ang'] = diff_ang
+	df['mean_diff_ang'] = mean_diff_ang
+	df['SD_diff_ang'] = SD_diff_ang
+	df['var_diff_ang'] = var_diff_ang
+	df.to_csv(dirname + fname)
+
 
 	# Single figure at the end with all configs
 	if single_output_fig:
@@ -293,7 +353,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 start = time.time()
 
-actuator_assembly(nLinks_top = 5, nLinks_bottom = 0, 
+actuator_assembly(nLinks_top = 2, nLinks_bottom = 2, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 				  joint_ranges_top = [pi/6], joint_ranges_bottom = [pi/6])
 
