@@ -222,10 +222,33 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 					 [end_coordinates[0][y], end_coordinates[1][y]], 
 					 c=col, linestyle='--', linewidth=0.5)
 
+
 		if plot_convex_hull:
-			plotted_points = np.hstack((plotted_points_upper, plotted_points_lower))
+			if bidirectional:
+				plotted_points = np.hstack((plotted_points_upper, plotted_points_lower))
+			else:
+				if nLinks_top:
+					plotted_points = plotted_points_upper
+				else: 
+					plotted_points = plotted_points_lower
+		
+
+
+			# if (np.any(plotted_points_upper) and np.any(plotted_points_lower)):
+			# 	plotted_points = np.hstack((plotted_points_upper, plotted_points_lower))
+			# elif (np.any(plotted_points_upper) and not np.any(plotted_points_lower)):
+			# 	plotted_points = plotted_points_upper
+			# elif (np.any(plotted_points_lower) and not np.any(plotted_points_upper)):
+			# 	plotted_points = plotted_points_lower
+			# else:
+			# 	break	
+
 			plotted_points = plotted_points.transpose()
-			plt.plot(plotted_points[0], plotted_points[1], 'ro')
+			#plt.plot(plotted_points[0], plotted_points[1], 'ro')
+
+			print(plotted_points.shape)
+			print(plotted_points[0:10, 0:2])
+			#plotted_points = plotted_points[:, 0:2]
 
 
 			
@@ -242,9 +265,10 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 			#print(plotted_points[np.unique(hull.simplices.ravel())])
 
-			plt.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], 'k', alpha=0.3)
+			# plt.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], 'k', alpha=0.3)
+			plt.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c=col, alpha=0.5)
 
-			plt.plot(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], 'ro')
+			#plt.plot(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], 'ro')
 
 			print(plotted_points[hull.vertices,0])
 
@@ -386,7 +410,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 start = time.time()
 
-actuator_assembly(nLinks_top = 2, nLinks_bottom = 2, 
+actuator_assembly(nLinks_top = 4, nLinks_bottom = 0, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 				  joint_ranges_top = [pi/6], joint_ranges_bottom = [pi/6])
 

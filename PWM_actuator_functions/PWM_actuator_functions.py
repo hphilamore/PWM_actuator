@@ -143,6 +143,8 @@ def bistable_actuator(*, numLinks = 2,
 
     	angle = joint_range/2 if bend_CCW else (-joint_range/2)
 
+
+
     	print()
     	print("link:" , (n+1))
     	print("upper:" , actuator_extends_up)
@@ -258,10 +260,15 @@ def bistable_actuator(*, numLinks = 2,
 
 		    # complile a single array of all points plotted to use for convex hull
 		    if n == 0:
+		    	# if all_arc_points:
+		    	# 	all_arc_points_all_configs
+
 		    	all_arc_points = arc
+
 		    else:
 		    	all_arc_points = np.hstack((all_arc_points, arc))
 
+		    print("allarc points", all_arc_points.shape)
 		    # draw arc
 		    # # PLOT: 
 		   	# # ARC
