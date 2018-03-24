@@ -117,27 +117,6 @@ def output_figure(filename):
 		plt.show()
 
 
-def split(u, v, points):
-    # return points on left side of UV
-    return [p for p in points if np.cross(p - u, v - u) < 0]
-
-def extend(u, v, points):
-    if not points:
-        return []
-
-    # find furthest point W, and split search to WV, UW
-    w = min(points, key=lambda p: np.cross(p - u, v - u))
-    p1, p2 = split(w, v, points), split(u, w, points)
-    return extend(w, v, p1) + [w] + extend(u, w, p2)
-
-def convex_hull(points):
-    # find two hull points, U, V, and split to left and right search
-    u = min(points, key=lambda p: p[0])
-    v = max(points, key=lambda p: p[0])
-    left, right = split(u, v, points), split(v, u, points)
-
-    # find convex hull on each side
-    return [v] + extend(u, v, left) + [u] + extend(v, u, right) + [v]
 
 
 
@@ -245,28 +224,9 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 		if plot_convex_hull:
 			plotted_points = np.hstack((plotted_points_upper, plotted_points_lower))
-			print(type(plotted_points))
-			print(plotted_points.shape)
 			plotted_points = plotted_points.transpose()
-
-			print(plotted_points.shape)
-			print(plotted_points)
-			print()
-			#plotted_points.transpose
-
-			#print(plotted_points.shape)
-			# print(plotted_points[0][0:3])
-			# print(plotted_points[1][0:3])
-			# print(plotted_points[0:2, 0:3])
-			# points = plotted_points[0:2, 0:100]
 			plt.plot(plotted_points[0], plotted_points[1], 'ro')
-			# find two hull points, U, V, and split to left and right search
-			u = min(plotted_points, key=lambda p: p[0])
-			print()
 
-			v = max(plotted_points, key=lambda p: p[0])
-			print(u)
-			print(v)
 
 			
 		    
@@ -275,10 +235,21 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			
 			hull = ConvexHull(plotted_points)
 
+			indices = np.unique(hull.simplices.flatten())
+			convexPolygonVerts = [plotted_points[i] for i in indices]
+
+			#print(convexPolygonVerts)
+
+			#print(plotted_points[np.unique(hull.simplices.ravel())])
+
 			plt.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], 'k', alpha=0.3)
 
-			for simplex in hull.simplices:
-				plt.plot(plotted_points[simplex, 0], plotted_points[simplex, 1], 'k-')
+			plt.plot(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], 'ro')
+
+			print(plotted_points[hull.vertices,0])
+
+			# for simplex in hull.simplices:
+			# 	plt.plot(plotted_points[simplex, 0], plotted_points[simplex, 1], 'k-')
 
 
 
