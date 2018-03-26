@@ -135,7 +135,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
 						 start_point = (0.0, 0.0),  
 						 plot_crest = True, plot_convex_hull = True,
-						 single_output_fig = True):
+						 single_output_fig = False, subplots = True):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
 
 	d = []
@@ -151,7 +151,8 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			  'link_twist',
 		 	  'end_coordinates',
 		 	  'end_to_end_length', 
-		 	  'end_to_end_angle'])
+		 	  'end_to_end_angle'
+		 	  ])
 
 	if (len(link_lengths_top)==1)    : link_lengths_top *= nLinks_top 
 	if (len(joint_ranges_top)==1)    : joint_ranges_top *= nLinks_top
@@ -161,6 +162,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	upper_actuator = list(map(list, itertools.product([0, 1], repeat=nLinks_top)))
 	lower_actuator = list(map(list, itertools.product([0, 1], repeat=nLinks_bottom)))
 
+
 	# print("lower", lower_actuator, len(lower_actuator))
 	# print("upper", upper_actuator, len(upper_actuator))
 	# upper_actuator = upper
@@ -169,6 +171,9 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	nlines = len(upper_actuator)
 	# color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
 	color=iter(plt.cm.binary(np.linspace(0.2, 1, nlines)))
+
+	if subplots:
+		f, axarr = plt.subplots(2, int(np.ceil((nLinks_top + nLinks_bottom)/2)))
 
 
 	#, vmin=0, vmax=20
@@ -231,54 +236,70 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 					plotted_points = plotted_points_upper
 				else: 
 					plotted_points = plotted_points_lower
-		
-
-
-			# if (np.any(plotted_points_upper) and np.any(plotted_points_lower)):
-			# 	plotted_points = np.hstack((plotted_points_upper, plotted_points_lower))
-			# elif (np.any(plotted_points_upper) and not np.any(plotted_points_lower)):
-			# 	plotted_points = plotted_points_upper
-			# elif (np.any(plotted_points_lower) and not np.any(plotted_points_upper)):
-			# 	plotted_points = plotted_points_lower
-			# else:
-			# 	break	
 
 			plotted_points = plotted_points.transpose()
-			#plt.plot(plotted_points[0], plotted_points[1], 'ro')
-
-			print(plotted_points.shape)
-			print(plotted_points[0:10, 0:2])
-			#plotted_points = plotted_points[:, 0:2]
-
-
-			
-		    
-		    
-			#hull = np.array(convex_hull(plotted_points))
 			
 			hull = ConvexHull(plotted_points)
 
-			indices = np.unique(hull.simplices.flatten())
-			convexPolygonVerts = [plotted_points[i] for i in indices]
-
-			#print(convexPolygonVerts)
-
-			#print(plotted_points[np.unique(hull.simplices.ravel())])
-
-			# plt.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], 'k', alpha=0.3)
 			plt.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c=col, alpha=0.5)
 
-			#plt.plot(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], 'ro')
+			# get the indices of the vertices of the convex hull
+			indices_x = plotted_points[hull.vertices,0]
+			indices_y = plotted_points[hull.vertices,1]
 
-			print(plotted_points[hull.vertices,0])
+			#### POTENTIALLY USEFUL STUFF ABOUT HOW TO FIND THE LONGEST SIDE OF THE HULL ####################
+			
+			# points_diff = np.array([indices_x[1:] - indices_x[:-1],
+			# 				        indices_y[1:] - indices_y[:-1]])
 
-			# for simplex in hull.simplices:
-			# 	plt.plot(plotted_points[simplex, 0], plotted_points[simplex, 1], 'k-')
+			# points_diff = np.hstack((#points_diff, 
+			# 			  np.array([[indices_x[0] - indices_x[-1],
+			# 				    	 indices_y[0] - indices_y[-1]]]).transpose(),
+			# 			  points_diff))
 
+			# print(points_diff[:,:4])
+			# print()
+			# #hull_side_len = dist = np.sqrt(np.sum(diff**2,axis=1))
+			# hull_side_len = points_diff**2
+			# print(hull_side_len[:,:4])
+			# print()
+
+			# hull_side_len = np.sum(points_diff**2, axis=0)
+			# print(hull_side_len)
+			# print(hull_side_len.shape)
+
+
+			# hull_side_len = np.sum(points_diff**2, axis=0)**(1/2)
+			# print(hull_side_len)
+			# print(hull_side_len.shape)
+
+			# longest = np.argmax(hull_side_len)
+
+			#################################################################################################
 
 
 		actuator_length = np.sqrt(float((end_coordinates[0][x] - end_coordinates[1][x])**2 + 
 			                      (end_coordinates[0][y] - end_coordinates[1][y])**2))
+
+	
+		# 	max_length = actuator_length
+		
+		#ND_length = actuator_length / max_length
+
+		# ND_hypot_len = sp.symbols('ND_hypot_len')
+
+		# # area = np.sqrt(((hypot_length / max_length)**2) - (ND_length**2)) * ND_length / 2
+
+		# # ND_area = np.sqrt(((ND_hypot_len)**2)-(ND_length**2)) * ND_length / 2
+
+		# ND_area = ((ND_hypot_len)**2)-(actuator_length**2)**(1/2) * actuator_length / 2
+
+
+
+
+
+
+
 
 		###################################
 		# TODO: replace with imported function that does exactly the same but isn't working for an unknown reason
@@ -385,6 +406,9 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	#diff_ang.append(None)
 	diff_ang.insert(0, None)
 
+
+	
+
 	df = pd.read_csv(dirname + fname)
 	df['diff_ang'] = diff_ang
 	df['mean_diff_ang'] = mean_diff_ang
@@ -410,8 +434,8 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 start = time.time()
 
-actuator_assembly(nLinks_top = 4, nLinks_bottom = 0, 
+actuator_assembly(nLinks_top = 2, nLinks_bottom = 0, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
-				  joint_ranges_top = [pi/6], joint_ranges_bottom = [pi/6])
+				  joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3])
 
 
