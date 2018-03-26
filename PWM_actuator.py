@@ -135,7 +135,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 						 link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
 						 start_point = (0.0, 0.0),  
-						 plot_crest=True, plot_convex_hull=True, plot_links=True, plot_bkgnd_links = True,
+						 plot_crest=True, plot_convex_hull=True, plot_links=True, plot_bkgnd_links = True, draw_boat = True,
 						 single_output_fig=True, subplots=True):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
 
@@ -263,17 +263,17 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 				for sp in subplot_idx:
 					p = axarr[sp]  
 					if nLinks_top: 
-						p.plot(plotted_points_upper[x], plotted_points_upper[y], c=watermark_col, zorder=1)
+						p.plot(plotted_points_upper[x], plotted_points_upper[y], c=watermark_col, zorder=2)
 					if nLinks_bottom:
-						p.plot(plotted_points_lower[x], plotted_points_lower[y], c=watermark_col, zorder=1)
+						p.plot(plotted_points_lower[x], plotted_points_lower[y], c=watermark_col, zorder=2)
 					#p.set(aspect=1)
 
 			else:
 				p = plt
 				if nLinks_top:
-					p.plot(plotted_points_upper[x], plotted_points_upper[y], c=watermarkcol, zorder=1)
+					p.plot(plotted_points_upper[x], plotted_points_upper[y], c=watermarkcol, zorder=2)
 				if nLinks_bottom:
-					p.plot(plotted_points_lower[x], plotted_points_lower[y], c=watermarkcol, zorder=1) 
+					p.plot(plotted_points_lower[x], plotted_points_lower[y], c=watermarkcol, zorder=2) 
 				#p.set(aspect=1)
 
 
@@ -513,27 +513,22 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 
 	# draw a boat with dimensions that scale with sail
-	sail_len_max = df['end_to_end_length'].max()
-	boat_len = sail_len_max * 2 / 3
-	boat_wid = boat_len / 3 
-	boat_outline = np.array([[ 0,             boat_wid/2,   boat_wid/2, 0,           (-boat_len/2), (-boat_len/2)],
-							 [(-boat_len/2), (-boat_len/3), boat_len/3, boat_len/2,  boat_len/3,    (-boat_len/3)]])
+	if draw_boat:
+		sail_len_max = df['end_to_end_length'].max()
+		boat_len = sail_len_max*4/5
+		boat_wid = boat_len / 3 
+		boat_outline_x =  [(-boat_len/2), (-boat_len/3), boat_len/3, boat_len/2,  boat_len/3,    (-boat_len/3), (-boat_len/2)]
+		boat_outline_y =  [ 0,             boat_wid/2,   boat_wid/2, 0,           (-boat_wid/2), (-boat_wid/2), 0]
 
-	boat_outline_x =  [(-boat_len/2), (-boat_len/3), boat_len/3, boat_len/2,  boat_len/3,    (-boat_len/3), (-boat_len/2)]
-	boat_outline_y =  [ 0,             boat_wid/2,   boat_wid/2, 0,           (-boat_wid/2), (-boat_wid/2), 0]
-
-	boat_outline = boat_outline.transpose()
-	hull = ConvexHull(boat_outline)
-	print(boat_outline)
-
-	# if (single_output_fig and subplots):
-	# 	for sp in subplot_idx:
-	# 		p = axarr[sp]  
-	# 		p.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c='k', alpha=0.5, zorder=3)
-	#else:
-	p = plt
-	p.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c='k', alpha=0.5, zorder=3)
-	p.plot(boat_outline_x, boat_outline_y)
+		if (single_output_fig and subplots):
+			for sp in subplot_idx:
+				p = axarr[sp]  
+				p.plot(boat_outline_x, boat_outline_y, c='0.5', linestyle='-.', alpha=0.5, zorder=1)
+				#p.fill(boat_outline_x, boat_outline_y, c='0.5', alpha=0.5, zorder=15)
+		else:
+			p = plt
+			p.plot(boat_outline_x, boat_outline_y, c='0.5', linestyle='-.', alpha=0.5, zorder=1)
+			#p.fill(boat_outline_x, boat_outline_y, c='0.5', alpha=0.5, zorder=15)
 
 
 	# Single figure at the end with all configs
