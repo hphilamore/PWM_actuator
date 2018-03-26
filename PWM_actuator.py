@@ -135,7 +135,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
 						 start_point = (0.0, 0.0),  
 						 plot_crest = True, plot_convex_hull = True,
-						 single_output_fig = False, subplots = True):
+						 single_output_fig = True, subplots = True):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
 
 	d = []
@@ -172,11 +172,21 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	# color=iter(plt.cm.cool(np.linspace(0,1,nlines)))
 	color=iter(plt.cm.binary(np.linspace(0.2, 1, nlines)))
 
-	if subplots:
-		f, axarr = plt.subplots(2, int(np.ceil((nLinks_top + nLinks_bottom)/2)))
+	# if subplots:
+	# 	nLinks = nLinks_top + nLinks_bottom
+	# 	print(nLinks)
+	# 	print(np.ceil((nLinks)/2))
+	# 	print(int(np.ceil((nLinks)/2)))
+	# 	#print(int(np.ceil((nLinks)/2)))
+	# 	f, axarr = plt.subplots(2, 2)#int(np.ceil((nLinks)/2)))
+	# 	subplot_idx = []
+	# 	if nLinks > 2
+	# 	for i in range(nLinks):
+	# 		subplot_idx.append((nLinks//2, 0))
+	# 		subplot_idx.append((nLinks//2, 1))
 
 
-	#, vmin=0, vmax=20
+	#, vmin=0, vmax=20nLinks)/2
 
 
 	if (nLinks_bottom and nLinks_top):
@@ -185,7 +195,44 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	else:
 		bidirectional = False
 
-	for u_states, l_states in itertools.zip_longest(upper_actuator, lower_actuator):
+
+		  # for n, (state, joint_range, length, ai, ti) in enumerate(zip(link_states[:numLinks], 
+    # 															 joint_ranges[:numLinks], 
+    # 															 link_lengths[:numLinks], 
+    # 															 aList[:numLinks], 
+    # 															 tList[:numLinks]))
+
+	for u_states, l_state in itertools.zip_longest(upper_actuator, lower_actuator):
+
+		
+
+		if subplots:
+			print("len upper", len(upper_actuator))
+			print("len lower", len(lower_actuator))
+			n_configs = np.max([len(upper_actuator), len(lower_actuator)])
+
+			print("n configs", n_configs)
+			
+			if n_configs <= 2:
+				print("only 2")
+
+				f, axarr = plt.subplots(2)
+				subplot_idx = [0, 1]
+				
+			else:
+				f, axarr = plt.subplots(2, int(np.ceil((n_configs)/2)))
+				subplot_idx = []
+				print(subplot_idx)
+				for i in range(int(np.ceil(n_configs/2))):
+					print("appending", i)
+					subplot_idx.append((i, 0))
+					subplot_idx.append((i, 1))
+					print(subplot_idx)
+
+
+
+
+
 
 		col=next(color)
 
@@ -223,7 +270,12 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 
 		if plot_crest:
-			plt.plot([end_coordinates[0][x], end_coordinates[1][x]], 
+			print(axarr.shape)
+			print("sp_idx" , subplot_idx)
+			print("sp_idx_len" , len(subplot_idx))
+			p = axarr[subplot_idx] if (single_output_fig and subplots) else plt
+
+			p.plot([end_coordinates[0][x], end_coordinates[1][x]], 
 					 [end_coordinates[0][y], end_coordinates[1][y]], 
 					 c=col, linestyle='--', linewidth=0.5)
 
@@ -434,7 +486,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 start = time.time()
 
-actuator_assembly(nLinks_top = 2, nLinks_bottom = 0, 
+actuator_assembly(nLinks_top = 4, nLinks_bottom = 0, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 				  joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3])
 
