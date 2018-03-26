@@ -107,6 +107,7 @@ joint_ranges_bottom = joint_ranges_top
 
 def output_figure(filename):
 		#plt.axis('equal')
+
 		#plt.gca().set_aspect(1)
 		# 
 		#filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
@@ -208,13 +209,13 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 				print("only 2")
 
 				#gs = gridspec.GridSpec(2, 1, wspace=0.025, hspace=0.05)
-				f, axarr = plt.subplots(2, sharex=True, sharey=True, gridspec_kw={'wspace':0.025, 'hspace':0.05})
+				f, axarr = plt.subplots(2, sharex=True, sharey=True)#, gridspec_kw={'wspace':0.025, 'hspace':0.05})
 
 				subplot_idx = [0, 1]
 				
 			else:
 				#gs = gridspec.GridSpec(int(np.ceil((n_configs)/2)), 2, wspace=0.025, hspace=0.05)
-				f, axarr = plt.subplots(int(np.ceil((n_configs)/2)), 2, sharex=True, sharey=True, gridspec_kw={'wspace':0, 'hspace':0})
+				f, axarr = plt.subplots(int(np.ceil((n_configs)/2)), 2, sharex=True, sharey=True)#, gridspec_kw={'wspace':0, 'hspace':0})
 				subplot_idx = []
 				print(subplot_idx)
 				for i in range(int(np.ceil(n_configs/2))):
@@ -321,6 +322,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			hull = ConvexHull(plotted_points)
 
 			p = axarr[subplot_idx[m]] if (single_output_fig and subplots) else plt
+			p.set(aspect=1)
 
 			p.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c=col, alpha=0.5)
 

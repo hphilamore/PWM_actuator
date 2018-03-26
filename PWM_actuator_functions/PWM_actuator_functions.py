@@ -217,42 +217,13 @@ def bistable_actuator(*, numLinks = 2,
 		    origin = (arc_start[x] + radius * np.cos(origin_angle),
 		    		  arc_start[y] + radius * np.sin(origin_angle))
 
-		    # if actuator_extends_up:
-		    # 	origin = (arc_start[x] + radius * np.cos(origin_angle),
-		    # 		  arc_start[y] + radius * np.sin(origin_angle))
-		    # else:
-		    # 	origin = (arc_start[x] + radius * np.cos(origin_angle),
-		    # 		  arc_start[y] + radius * np.sin(origin_angle))
-
-
-
-		    # origin = np.array([arc_start[x] + radius * np.cos(origin_angle, arc_start[y] + radius * np.sin(origin_angle)])
-
-		    # print ()
-		    
-
-		    
-		    # # # plot arc
-		    # print(origin)
 		    plot_start_angle = angle_to_Xdatum(origin, arc_start, radius)
-		    # plot_end_angle = angle_to_Xdatum(origin, arc_end, radius)
+
 		    plot_end_angle = plot_start_angle + (joint_range if bend_CCW else (-joint_range))
-		    # arc_end_to_origin = angle_to_Xdatum(origin, arc_end, radius)
-
-		    # deal with case where arc crosses from 4th to 1st quadrant
-		    # if bend_CCW:
-		    # 	if plot_start_angle > plot_end_angle:
-		    # 		plot_start_angle = -1 * (2 * pi - (plot_start_angle))
-		    # else:
-		    # 	if plot_start_angle < plot_end_angle:
-		    # 		plot_start_angle = -1 * (2 * pi - (plot_start_angle))
-
 		        
 		    arc_points = np.linspace(plot_start_angle, 
 		    						 plot_end_angle, 
-		    						 num_plot_points) 
-
-		    # print(origin[x] + radius)       
+		    						 num_plot_points)      
 
 		    arc = np.array([origin[x] + radius * np.cos(arc_points), 
 		                    origin[y] + radius * np.sin(arc_points)])
@@ -260,71 +231,21 @@ def bistable_actuator(*, numLinks = 2,
 
 		    # complile a single array of all points plotted to use for convex hull
 		    if n == 0:
-		    	# if all_arc_points:
-		    	# 	all_arc_points_all_configs
-
 		    	all_arc_points = arc
 
 		    else:
 		    	all_arc_points = np.hstack((all_arc_points, arc))
-
-		    print("allarc points", all_arc_points.shape)
 		    # draw arc
 		    # # PLOT: 
 		   	# # ARC
-		    if set_plot_colour:
+		    #if set_plot_colour:
 		    	#plt.plot(arc[x], arc[y], color=plt.cm.cool(plot_colour))
-		    	plt.plot(arc[x], arc[y], c=plot_colour)  
-		    else:
-		    	plt.plot(arc[x], arc[y])
+		    plt.plot(arc[x], arc[y], c=plot_colour if set_plot_colour else 'Auto')  
+		    # else:
+		    # 	plt.plot(arc[x], arc[y])
 
     	else:
-    		all_arc_points = None
-
-		    # plt.plot(origin[x], origin[y], 'co')
-		    # plt.plot(arc[x, 0], arc[y, 0], 'ro')
-		    # plt.plot(arc_start[x], arc_start[y], 'g^')
-		    # plt.plot(arc[x, -1], arc[y, -1], 'bo')
-		    # plt.plot(arc_end[x], arc_end[y], 'm^')
-
-		    # # start point
-		    # if n == 0: 	
-		    # 	if actuator_extends_up:
-		    # 		plt.plot(arc[x, 0], arc[y, 0], 'ro')
-		    # 		plt.plot(arc[x, 0], arc[y, 0], 'ro')
-		    # 		plt.plot(arc[x, 0], arc[y, 0], 'ro')
-		    # 		plt.plot(arc[x, 0], arc[y, 0], 'ro')
-
-		    # 	else:
-		    # 		plt.plot(arc[x, 0], arc[y, 0], 'g^')
-		    # else:
-		    # 	plt.plot(arc[x, 0], arc[y, 0], 'ko')
-
-
-		    #print()
-		    #print("link:" , (n+1))
-		    ###########################################
-		    # PRINT
-		    ###########################################
-		    # print("SP:", SP)
-		    # print("EP:", EP)
-		    # print("arc start:", arc_start)
-		    # print("arc end:", arc_end)
-		    # print("origin", origin)   
-		    # print("joint_angles:", joint_angles)
-		    # print("radius", radius)
-		    # print("cord angle", cord_angle)
-		    # print("j:", j)
-		    # print("origin angle", origin_angle)
-		    # print("plot start angle", plot_start_angle)
-		    # print("plot end angle", plot_end_angle)
-
-		    # print(H)
-		    # #print("angle end to x datum:" , arc_start_to_x)
-		    # print()
-		    #############################################
-
-			
+    		all_arc_points = None		
 	    	
 
     # simplify terms of matrix
