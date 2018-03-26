@@ -107,7 +107,7 @@ joint_ranges_bottom = joint_ranges_top
 
 def output_figure(filename):
 		#plt.axis('equal')
-
+		#plt.set(aspect=1)
 		#plt.gca().set_aspect(1)
 		# 
 		#filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
@@ -135,7 +135,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 						 link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
 						 start_point = (0.0, 0.0),  
-						 plot_crest=True, plot_convex_hull=True, plot_links=True,
+						 plot_crest=True, plot_convex_hull=True, plot_links=True, plot_bkgnd_links = True,
 						 single_output_fig=True, subplots=True):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
 
@@ -199,36 +199,31 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	n_configs = np.max([len(upper_actuator), len(lower_actuator)])
 
 	if subplots:
-			print("len upper", len(upper_actuator))
-			print("len lower", len(lower_actuator))
-			#n_configs = np.max([len(upper_actuator), len(lower_actuator)])
-
-			print("n configs", n_configs)
 			
 			if n_configs <= 2:
-				print("only 2")
-
-				#gs = gridspec.GridSpec(2, 1, wspace=0.025, hspace=0.05)
 				f, axarr = plt.subplots(2, sharex=True, sharey=True)#, gridspec_kw={'wspace':0.025, 'hspace':0.05})
-
 				subplot_idx = [0, 1]
 				
 			else:
-				#gs = gridspec.GridSpec(int(np.ceil((n_configs)/2)), 2, wspace=0.025, hspace=0.05)
 				f, axarr = plt.subplots(int(np.ceil((n_configs)/2)), 2, sharex=True, sharey=True)#, gridspec_kw={'wspace':0, 'hspace':0})
 				subplot_idx = []
-				print(subplot_idx)
 				for i in range(int(np.ceil(n_configs/2))):
-					print("appending", i)
 					subplot_idx.append((i, 0))
 					subplot_idx.append((i, 1))
-					print(subplot_idx)
 
-			##axarr.set(aspect=1)
+			# shared axes labels for all subplots
+			# f.text(0.5, 0.04, 'X', ha='center')
+			# f.text(0.04, 0.5, 'Z', va='center')#, rotation='vertical')
+
+			plt.setp([a.set_xticks([]) for a in f.axes[:]])          # changes apply to the x-axis
+			plt.setp([a.set_yticks([]) for a in f.axes[:]]) 
+			plt.setp([a.set(aspect=1) for a in f.axes[:]])
 
 	for m, (u_states, l_states) in enumerate(itertools.zip_longest(upper_actuator, lower_actuator)):
 
-		col=next(color)
+		col = next(color)
+		col = 'k' 
+		watermark_col = '0.7'
 
 		direction_up = True
 		if nLinks_top:
@@ -263,10 +258,39 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 				end_coordinates = [start_point, tip_lower]
 
 
+		if plot_bkgnd_links:
+			if (single_output_fig and subplots):
+				for sp in subplot_idx:
+					p = axarr[sp]  
+					if nLinks_top: 
+						p.plot(plotted_points_upper[x], plotted_points_upper[y], c=watermark_col, zorder=1)
+					if nLinks_bottom:
+						p.plot(plotted_points_lower[x], plotted_points_lower[y], c=watermark_col, zorder=1)
+					#p.set(aspect=1)
+
+			else:
+				p = plt
+				if nLinks_top:
+					p.plot(plotted_points_upper[x], plotted_points_upper[y], c=watermarkcol, zorder=1)
+				if nLinks_bottom:
+					p.plot(plotted_points_lower[x], plotted_points_lower[y], c=watermarkcol, zorder=1) 
+				#p.set(aspect=1)
+
+
+			 
+			
+
+
 		if plot_links:
 			p = axarr[subplot_idx[m]] if (single_output_fig and subplots) else plt
-			p.plot(plotted_points_upper[x], plotted_points_upper[y], c=col) 
-			p.plot(plotted_points_lower[x], plotted_points_lower[y], c=col) 
+
+			if nLinks_top:
+				p.plot(plotted_points_upper[x], plotted_points_upper[y], c=col, zorder=10, linewidth=1.5)
+			if nLinks_bottom:
+				p.plot(plotted_points_lower[x], plotted_points_lower[y], c=col, zorder=10, linewidth=1.5)
+			 
+			 
+			#p.set(aspect=1)
 
 
 		if plot_crest:
@@ -275,11 +299,11 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 			print(p)
 			# https://stackoverflow.com/questions/14907062/aspect-ratio-in-subplots-with-various-y-axes
-			p.set(aspect=1)
+			#p.set(aspect=1)
 
 			p.plot([end_coordinates[0][x], end_coordinates[1][x]], 
 					 [end_coordinates[0][y], end_coordinates[1][y]], 
-					 c=col, linestyle='--', linewidth=0.5)
+					 c=col, linestyle='--', linewidth=0.5, zorder=5)
 
 
 		if plot_convex_hull:
@@ -296,13 +320,20 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			hull = ConvexHull(plotted_points)
 
 			p = axarr[subplot_idx[m]] if (single_output_fig and subplots) else plt
-			p.set(aspect=1)
+			# p.set(aspect=1)
+			# p.set(aspect=1)
 
-			p.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c=col, alpha=0.5)
+			p.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c=col, alpha=0.5, zorder=3)
 
 			# get the indices of the vertices of the convex hull
 			indices_x = plotted_points[hull.vertices,0]
 			indices_y = plotted_points[hull.vertices,1]
+
+		# remove all tick marks
+		# if subplots:
+		# 	for sp in subplot_idx:
+		# 		sp.set_xticklabels([])
+		# 		sp.set_yticklabels([])
 
 			#### POTENTIALLY USEFUL STUFF ABOUT HOW TO FIND THE LONGEST SIDE OF THE HULL ####################
 			
@@ -367,6 +398,11 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 		actuator_angle = angle_to_Ydatum(end_coordinates[1], end_coordinates[0], actuator_length)
 		print(actuator_angle)
 
+		if subplots:
+			p.set_title(f'a = {round(actuator_angle, 2)}', 
+						fontdict={'fontsize': 10})#, 'horizontalalignment': 'left'})
+
+
 
 		# point = B[2]
 		# origin = A[2] if bi_directional_actuator else np.array([0.0, 0.0])
@@ -414,6 +450,8 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 				   round(actuator_angle, 2)
 				   ])
 
+
+ 
 	# sort data in order of sail angle to y datum
 	# d[1:] = d[1:].sort(key=lambda x: x[12])
 	d[1:] = sorted(d[1:], key=lambda x: x[12])
@@ -474,6 +512,30 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	df.to_csv(dirname + fname)
 
 
+	# draw a boat with dimensions that scale with sail
+	sail_len_max = df['end_to_end_length'].max()
+	boat_len = sail_len_max * 2 / 3
+	boat_wid = boat_len / 3 
+	boat_outline = np.array([[ 0,             boat_wid/2,   boat_wid/2, 0,           (-boat_len/2), (-boat_len/2)],
+							 [(-boat_len/2), (-boat_len/3), boat_len/3, boat_len/2,  boat_len/3,    (-boat_len/3)]])
+
+	boat_outline_x =  [(-boat_len/2), (-boat_len/3), boat_len/3, boat_len/2,  boat_len/3,    (-boat_len/3), (-boat_len/2)]
+	boat_outline_y =  [ 0,             boat_wid/2,   boat_wid/2, 0,           (-boat_wid/2), (-boat_wid/2), 0]
+
+	boat_outline = boat_outline.transpose()
+	hull = ConvexHull(boat_outline)
+	print(boat_outline)
+
+	# if (single_output_fig and subplots):
+	# 	for sp in subplot_idx:
+	# 		p = axarr[sp]  
+	# 		p.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c='k', alpha=0.5, zorder=3)
+	#else:
+	p = plt
+	p.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c='k', alpha=0.5, zorder=3)
+	p.plot(boat_outline_x, boat_outline_y)
+
+
 	# Single figure at the end with all configs
 	if single_output_fig:
 		fname = 'all_configs-' + linkstr + timestr
@@ -491,7 +553,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 start = time.time()
 
-actuator_assembly(nLinks_top = 2, nLinks_bottom = 2, 
+actuator_assembly(nLinks_top = 2, nLinks_bottom = 0, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 				  joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3])
 
