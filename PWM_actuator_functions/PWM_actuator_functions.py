@@ -238,11 +238,8 @@ def bistable_actuator(*, numLinks = 2,
 		    # draw arc
 		    # # PLOT: 
 		   	# # ARC
-		    #if set_plot_colour:
-		    	#plt.plot(arc[x], arc[y], color=plt.cm.cool(plot_colour))
-		    plt.plot(arc[x], arc[y], c=plot_colour if set_plot_colour else 'Auto')  
-		    # else:
-		    # 	plt.plot(arc[x], arc[y])
+		    #plt.plot(arc[x], arc[y], c=plot_colour if set_plot_colour else 'Auto')  
+
 
     	else:
     		all_arc_points = None		

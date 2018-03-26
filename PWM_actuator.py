@@ -135,8 +135,8 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 						 link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
 						 start_point = (0.0, 0.0),  
-						 plot_crest = True, plot_convex_hull = True,
-						 single_output_fig = True, subplots = True):
+						 plot_crest=True, plot_convex_hull=True, plot_links=True,
+						 single_output_fig=True, subplots=True):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
 
 	d = []
@@ -228,36 +228,6 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 	for m, (u_states, l_states) in enumerate(itertools.zip_longest(upper_actuator, lower_actuator)):
 
-		
-
-		# if subplots:
-		# 	print("len upper", len(upper_actuator))
-		# 	print("len lower", len(lower_actuator))
-		# 	n_configs = np.max([len(upper_actuator), len(lower_actuator)])
-
-		# 	print("n configs", n_configs)
-			
-		# 	if n_configs <= 2:
-		# 		print("only 2")
-
-		# 		f, axarr = plt.subplots(2)
-		# 		subplot_idx = [0, 1]
-				
-		# 	else:
-		# 		f, axarr = plt.subplots(2, int(np.ceil((n_configs)/2)))
-		# 		subplot_idx = []
-		# 		print(subplot_idx)
-		# 		for i in range(int(np.ceil(n_configs/2))):
-		# 			print("appending", i)
-		# 			subplot_idx.append((i, 0))
-		# 			subplot_idx.append((i, 1))
-		# 			print(subplot_idx)
-
-
-
-
-
-
 		col=next(color)
 
 		direction_up = True
@@ -293,10 +263,14 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 				end_coordinates = [start_point, tip_lower]
 
 
+		if plot_links:
+			p = axarr[subplot_idx[m]] if (single_output_fig and subplots) else plt
+			p.plot(plotted_points_upper[x], plotted_points_upper[y], c=col) 
+			p.plot(plotted_points_lower[x], plotted_points_lower[y], c=col) 
+
+
 		if plot_crest:
-			print(axarr.shape)
-			print("sp_idx" , subplot_idx[m])
-			print("sp_idx_all" , subplot_idx)
+
 			p = axarr[subplot_idx[m]] if (single_output_fig and subplots) else plt
 
 			print(p)
