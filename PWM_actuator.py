@@ -116,6 +116,9 @@ def output_figure(filename):
 		plt.savefig(dirname + filename + ".pdf", 
 					orientation='portrait', 
 					transparent=False) 
+		plt.savefig(dirname + filename + ".png", 
+					orientation='portrait', 
+					transparent=False) 
 		plt.show()
 
 
@@ -207,7 +210,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			if n_configs <= plots_per_row:
 				f, axarr = plt.subplots(plots_per_row, 
 										sharex=True, 
-										sharey=True)#, gridspec_kw={'wspace':0.025, 'hspace':0.05})
+										sharey=True, gridspec_kw={'wspace':0.025, 'hspace':0.05})
 				#subplot_idx = [0, 1]
 				subplot_idx = list(range(plots_per_row))
 				
@@ -326,7 +329,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			p = axarr[subplot_idx[m]] if (single_output_fig and subplots) else plt
 
 			print(p)
-			# https://stackoverflow.com/questions/14907062/aspect-ratio-in-subplots-with-various-y-axes
+			# https://stackoverflow.com/questions/14907062/aspect-ratifo-in-subplots-with-various-y-axes
 			#p.set(aspect=1)
 
 			p.plot([end_coordinates[0][x], end_coordinates[1][x]], 
@@ -439,7 +442,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 		if plot_wind_angle:
 			line = 'solid'
-			arrow_len = 20
+			arrow_len = 35
 
 			if 0 < abs(actuator_angle) < (pi/2):
 				if actuator_angle > 0:
@@ -450,7 +453,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 				dx = -(arrow_len * np.cos(wind_angle))
 				dy = -(arrow_len * np.sin(wind_angle))
 
-				tail_x, tail_y = (np.mean(link_lengths_top) * (nLinks_top/2)), 0
+				tail_x, tail_y = (np.mean(link_lengths_top) * (nLinks_top * 4/5)), 0
 
 			elif (pi/2 <= abs(actuator_angle) < (pi)):
 				if actuator_angle > 0:
@@ -501,9 +504,9 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			# p.quiver([0, 0], [0, 0], [-20, 40], [2, -7], angles='xy', scale_units='xy', scale=1)
 			# p.quiver([20], [20], [40], [-7], angles='xy', scale_units='xy', scale=1)
 			# p.quiver([0], [ 0], [20], [2], angles='xy', scale_units='xy', scale=1)
-
-			p.quiver([tail_x], [tail_y], [dx], [dy], angles='xy', scale_units='xy', scale=1)
-			#p.quiver([0], [ 0], [20], [2], angles='xy', scale_units='xy', scale=1)
+			p.quiver([tail_x], [tail_y], [dx], [dy], angles='xy', scale_units='xy', scale=1, linewidth=15, zorder=16)
+			#p.quiver([tail_x], [tail_y], [dx], [dy], angles='xy', scale_units='xy', scale=1, units='dots', width=0.1, linewidth=15, zorder=16)
+			#p.quiver([0], [ 0], [20], [2], angles='xby', scale_units='xy', scale=1)
 			#p.plot([tail_x, head_x], [tail_y, head_y])#, fc='k', ec='k', linestyle=line)
 			if subplots:
 						p.set_title(f'a = {round(actuator_angle, 2)}, b = {round(wind_angle, 2)}', 
@@ -625,7 +628,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	# draw a boat with dimensions that scale with sail
 	if draw_boat:
 		sail_len_max = df['end_to_end_length'].max()
-		boat_len = sail_len_max*4/5
+		boat_len = sail_len_max*3/4
 		# boat_wid = boat_len / 3 
 		# boat_outline_x =  [(-boat_len/2), (-boat_len/3), boat_len/3, boat_len/2,  boat_len/3,    (-boat_len/3), (-boat_len/2)]
 		# boat_outline_y =  [ 0,             boat_wid/2,   boat_wid/2, 0,           (-boat_wid/2), (-boat_wid/2), 0]
@@ -637,12 +640,12 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			for sp in subplot_idx:
 				p = axarr[sp]  
 				#p.plot(boat_outline_x, boat_outline_y, c='0.5', linestyle='-.', alpha=0.5, zorder=1)
-				p.plot(boat_outline_x, boat_outline_y, c='k', zorder=1, linewidth=1)
+				p.plot(boat_outline_x, boat_outline_y, c='0.5', zorder=1, linewidth=1)
 				#p.fill(boat_outline_x, boat_outline_y, c='0.5', alpha=0.5, zorder=15)
 		else:
 			p = plt
 			#p.plot(boat_outline_x, boat_outline_y, c='0.5', linestyle='-.', alpha=0.5, zorder=1)
-			p.plot(boat_outline_x, boat_outline_y, c='k', zorder=1, linewidth=1)
+			p.plot(boat_outline_x, boat_outline_y, c='0.5', zorder=1, linewidth=1)
 			#p.fill(boat_outline_x, boat_outline_y, c='0.5', alpha=0.5, zorder=15)
 
 
@@ -663,7 +666,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 start = time.time()
 
-actuator_assembly(nLinks_top = 2, nLinks_bottom = 2, 
+actuator_assembly(nLinks_top = 4, nLinks_bottom = 4, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 				  joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3])
 
