@@ -349,7 +349,8 @@ def bistable_actuator(*, numLinks = 2,
 
     EP = Hn * SP
 
-    plt.gca().set_aspect(1)
+    
+    #plt.gca().set_aspect(1)
 
     #plt.axis('equal')
 	

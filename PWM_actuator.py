@@ -106,8 +106,8 @@ joint_ranges_bottom = joint_ranges_top
 # 	 	  'end_to_end_angle'])
 
 def output_figure(filename):
-		plt.axis('equal')
-		plt.gca().set_aspect(1)
+		#plt.axis('equal')
+		#plt.gca().set_aspect(1)
 		# 
 		#filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
 		os.makedirs(os.path.dirname(dirname), exist_ok=True)
@@ -207,11 +207,14 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			if n_configs <= 2:
 				print("only 2")
 
-				f, axarr = plt.subplots(2)
+				#gs = gridspec.GridSpec(2, 1, wspace=0.025, hspace=0.05)
+				f, axarr = plt.subplots(2, sharex=True, sharey=True, gridspec_kw={'wspace':0.025, 'hspace':0.05})
+
 				subplot_idx = [0, 1]
 				
 			else:
-				f, axarr = plt.subplots(int(np.ceil((n_configs)/2)), 2)
+				#gs = gridspec.GridSpec(int(np.ceil((n_configs)/2)), 2, wspace=0.025, hspace=0.05)
+				f, axarr = plt.subplots(int(np.ceil((n_configs)/2)), 2, sharex=True, sharey=True, gridspec_kw={'wspace':0, 'hspace':0})
 				subplot_idx = []
 				print(subplot_idx)
 				for i in range(int(np.ceil(n_configs/2))):
@@ -220,7 +223,9 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 					subplot_idx.append((i, 1))
 					print(subplot_idx)
 
-	for m, (u_states, l_state) in enumerate(itertools.zip_longest(upper_actuator, lower_actuator)):
+			##axarr.set(aspect=1)
+
+	for m, (u_states, l_states) in enumerate(itertools.zip_longest(upper_actuator, lower_actuator)):
 
 		
 
@@ -294,6 +299,8 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			p = axarr[subplot_idx[m]] if (single_output_fig and subplots) else plt
 
 			print(p)
+			# https://stackoverflow.com/questions/14907062/aspect-ratio-in-subplots-with-various-y-axes
+			p.set(aspect=1)
 
 			p.plot([end_coordinates[0][x], end_coordinates[1][x]], 
 					 [end_coordinates[0][y], end_coordinates[1][y]], 
@@ -313,7 +320,9 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			
 			hull = ConvexHull(plotted_points)
 
-			plt.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c=col, alpha=0.5)
+			p = axarr[subplot_idx[m]] if (single_output_fig and subplots) else plt
+
+			p.fill(plotted_points[hull.vertices,0], plotted_points[hull.vertices,1], c=col, alpha=0.5)
 
 			# get the indices of the vertices of the convex hull
 			indices_x = plotted_points[hull.vertices,0]
@@ -506,7 +515,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 start = time.time()
 
-actuator_assembly(nLinks_top = 4, nLinks_bottom = 0, 
+actuator_assembly(nLinks_top = 2, nLinks_bottom = 2, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 				  joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3])
 
