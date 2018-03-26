@@ -111,6 +111,7 @@ def output_figure(filename):
 		#plt.gca().set_aspect(1)
 		# 
 		#filename = ''.join(str(bb) for bb in b) + '-' + ''.join(str(aa) for aa in a) + '.png'
+		plt.tight_layout()
 		os.makedirs(os.path.dirname(dirname), exist_ok=True)
 		plt.savefig(dirname + filename + ".pdf", 
 					orientation='portrait', 
@@ -135,7 +136,8 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 						 link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 						 joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3],
 						 start_point = (0.0, 0.0),  
-						 plot_crest=True, plot_convex_hull=True, plot_links=True, plot_bkgnd_links = True, draw_boat = True,
+						 plot_crest=True, plot_convex_hull=True, plot_links=True, plot_bkgnd_links = True, 
+						 draw_boat = True, plot_wind_angle = True,
 						 single_output_fig=True, subplots=True):
 	"Assembles one (extending up) or two (extending down) series linked chains of bistable actuators"
 
@@ -199,17 +201,36 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	n_configs = np.max([len(upper_actuator), len(lower_actuator)])
 
 	if subplots:
+
+			plots_per_row = 4
 			
-			if n_configs <= 2:
-				f, axarr = plt.subplots(2, sharex=True, sharey=True)#, gridspec_kw={'wspace':0.025, 'hspace':0.05})
-				subplot_idx = [0, 1]
+			if n_configs <= plots_per_row:
+				f, axarr = plt.subplots(plots_per_row, 
+										sharex=True, 
+										sharey=True)#, gridspec_kw={'wspace':0.025, 'hspace':0.05})
+				#subplot_idx = [0, 1]
+				subplot_idx = list(range(plots_per_row))
 				
 			else:
-				f, axarr = plt.subplots(int(np.ceil((n_configs)/2)), 2, sharex=True, sharey=True)#, gridspec_kw={'wspace':0, 'hspace':0})
+				# f, axarr = plt.subplots(int(np.ceil((n_configs)/2)), 2, sharex=True, sharey=True)#, gridspec_kw={'wspace':0, 'hspace':0})
+				# subplot_idx = []
+				# for i in range(int(np.ceil(n_configs/2))):
+				# 	subplot_idx.append((i, 0))
+				# 	subplot_idx.append((i, 1))
+
+				#  rows, cols
+				f, axarr = plt.subplots(int(np.ceil((n_configs)/plots_per_row)), 
+										plots_per_row, 
+										sharex=True, 
+										sharey=True)#, gridspec_kw={'wspace':0, 'hspace':0})
+
 				subplot_idx = []
-				for i in range(int(np.ceil(n_configs/2))):
+
+				for i in range(int(np.ceil(n_configs/plots_per_row))):
 					subplot_idx.append((i, 0))
 					subplot_idx.append((i, 1))
+					subplot_idx.append((i, 2))
+					subplot_idx.append((i, 3))
 
 			# shared axes labels for all subplots
 			# f.text(0.5, 0.04, 'X', ha='center')
@@ -218,6 +239,13 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			plt.setp([a.set_xticks([]) for a in f.axes[:]])          # changes apply to the x-axis
 			plt.setp([a.set_yticks([]) for a in f.axes[:]]) 
 			plt.setp([a.set(aspect=1) for a in f.axes[:]])
+			plt.setp([a.axis('off') for a in f.axes[:]])
+
+			# remove box outline
+			f.patch.set_visible(False)
+			#axarr.axis('off')
+
+
 
 	for m, (u_states, l_states) in enumerate(itertools.zip_longest(upper_actuator, lower_actuator)):
 
@@ -329,6 +357,10 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			indices_x = plotted_points[hull.vertices,0]
 			indices_y = plotted_points[hull.vertices,1]
 
+
+		
+
+
 		# remove all tick marks
 		# if subplots:
 		# 	for sp in subplot_idx:
@@ -395,12 +427,88 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 
 		# actuator_angle = angle_to_Xdatum(end_coordinates[1], end_coordinates[0], actuator_length)
-		actuator_angle = angle_to_Ydatum(end_coordinates[1], end_coordinates[0], actuator_length)
+		actuator_angle = angle_abt_centre(end_coordinates[1], 
+										  end_coordinates[0],
+										  actuator_length)
 		print(actuator_angle)
 
-		if subplots:
-			p.set_title(f'a = {round(actuator_angle, 2)}', 
-						fontdict={'fontsize': 10})#, 'horizontalalignment': 'left'})
+		# if subplots:
+		# 	p.set_title(f'a = {round(actuator_angle, 2)}', 
+		# 				fontdict={'fontsize': 8})#, 'horizontalalignment': 'left'})
+
+
+		if plot_wind_angle:
+			line = 'solid'
+			arrow_len = 20
+
+			if 0 < abs(actuator_angle) < (pi/2):
+				if actuator_angle > 0:
+					wind_angle = actuator_angle + np.radians(10)
+				else:
+					wind_angle = actuator_angle + np.radians(10)
+
+				dx = -(arrow_len * np.cos(wind_angle))
+				dy = -(arrow_len * np.sin(wind_angle))
+
+				tail_x, tail_y = (np.mean(link_lengths_top) * (nLinks_top/2)), 0
+
+			elif (pi/2 <= abs(actuator_angle) < (pi)):
+				if actuator_angle > 0:
+					wind_angle = actuator_angle + pi/2
+				else:
+					wind_angle = actuator_angle + pi/2
+
+				dx = -(arrow_len * np.cos(wind_angle))
+				dy = -(arrow_len * np.sin(wind_angle))
+
+				tail_x, tail_y = -(np.mean(link_lengths_top) * (nLinks_top/2)), 0
+
+				# wind_angle = actuator_angle + np.radians(10) if (actuator_angle > 0) else (-np.radians(10))
+				# tail_x, tail_y = (np.mean(link_lengths_top) * (nLinks_top/2)), 0
+				
+				# dx = -(arrow_len * np.cos(wind_angle))
+				# dy = (arrow_len * np.sin(wind_angle))
+			
+			# elif (pi/2 <= abs(actuator_angle) < (pi)):
+			# 	wind_angle = actuator_angle + np.radians(pi/2) if (actuator_angle > 0) else (-np.radians(pi/2))
+			# 	tail_x, tail_y = -(np.mean(link_lengths_top) * (nLinks_top/2)), 0
+			# 	#arrow_len = 20
+			# 	dx = +(arrow_len * np.cos(wind_angle))
+			# 	dy = -(arrow_len * np.sin(wind_angle))
+				
+
+			#elif (np.allclose(actuator_angle, pi) or np.allclose(actuator_angle, 0))
+			else:
+				wind_angle = actuator_angle
+
+				tail_x, tail_y = (np.mean(link_lengths_top) * (nLinks_top/2)), 0
+				# line = 'dashed'
+				# tail_x, tail_y = (np.mean(link_lengths_top) * (nLinks_top/2)), 0
+				#arrow_len = 20
+				#tail_x, tail_y= (head_x + arrow_len), 0
+
+
+				dx = -(arrow_len) 
+				dy = 0
+
+
+			p = axarr[subplot_idx[m]] if (single_output_fig and subplots) else plt
+			# p.set(aspect=1)
+			# p.set(aspect=1)
+
+			#p.arrow(tail_x, tail_y, head_x, head_y, head_width=15, head_length=30, fc='k', ec='k', linestyle=line)
+			#p.quiver([0, 0, 0], [0, 0, 0], [10, -20, 40], [1, 2, -7], angles='xy', scale_units='xy', scale=1)
+			# p.quiver([0, 0], [0, 0], [-20, 40], [2, -7], angles='xy', scale_units='xy', scale=1)
+			# p.quiver([20], [20], [40], [-7], angles='xy', scale_units='xy', scale=1)
+			# p.quiver([0], [ 0], [20], [2], angles='xy', scale_units='xy', scale=1)
+
+			p.quiver([tail_x], [tail_y], [dx], [dy], angles='xy', scale_units='xy', scale=1)
+			#p.quiver([0], [ 0], [20], [2], angles='xy', scale_units='xy', scale=1)
+			#p.plot([tail_x, head_x], [tail_y, head_y])#, fc='k', ec='k', linestyle=line)
+			if subplots:
+						p.set_title(f'a = {round(actuator_angle, 2)}, b = {round(wind_angle, 2)}', 
+									fontdict={'fontsize': 8})#, 'horizontalalignment': 'left'})
+
 
 
 
@@ -435,13 +543,13 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 			
 
 		d.append([ nLinks_top,
-				   u_states[:nLinks_top] if nLinks_top else None, 
-				   np.around(link_lengths_top[:nLinks_top], 2) if nLinks_top else None,
-				   np.around(joint_ranges_top[:nLinks_top], 2) if nLinks_top else None,
+				   u_states[:nLinks_top] if nLinks_top else '-', #None, 
+				   np.around(link_lengths_top[:nLinks_top], 2) if nLinks_top else '-', #None, 
+				   np.around(joint_ranges_top[:nLinks_top], 2) if nLinks_top else '-', #None, 
 				   nLinks_bottom,
-				   np.around(l_states[:nLinks_bottom], 2) if nLinks_bottom else None,
-				   np.around(link_lengths_bottom[:nLinks_bottom], 2) if nLinks_bottom else None, 
-				   np.around(joint_ranges_bottom[:nLinks_bottom], 2) if nLinks_bottom else None,
+				   np.around(l_states[:nLinks_bottom], 2) if nLinks_bottom else '-', #None, 
+				   np.around(link_lengths_bottom[:nLinks_bottom], 2) if nLinks_bottom else '-', #None, 
+				   np.around(joint_ranges_bottom[:nLinks_bottom], 2) if nLinks_bottom else '-', #None, 
 				   0,
 				   0,
 				   [round(end_coordinates[1][0],2), round(end_coordinates[1][1],2), 
@@ -455,6 +563,10 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	# sort data in order of sail angle to y datum
 	# d[1:] = d[1:].sort(key=lambda x: x[12])
 	d[1:] = sorted(d[1:], key=lambda x: x[12])
+
+	#subplot_idx_sorted = [x for _, x in sorted(zip(Y,X), key=lambda pair: pair[0])]
+
+
 
 	
 
@@ -499,10 +611,8 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	var_diff_ang = np.var(diff_ang)
 
 	#diff_ang.append(None)
-	diff_ang.insert(0, None)
+	diff_ang.insert(0, abs(list_ang[0]-list_ang[-1]))
 
-
-	
 
 	df = pd.read_csv(dirname + fname)
 	df['diff_ang'] = diff_ang
@@ -516,18 +626,23 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 	if draw_boat:
 		sail_len_max = df['end_to_end_length'].max()
 		boat_len = sail_len_max*4/5
-		boat_wid = boat_len / 3 
-		boat_outline_x =  [(-boat_len/2), (-boat_len/3), boat_len/3, boat_len/2,  boat_len/3,    (-boat_len/3), (-boat_len/2)]
-		boat_outline_y =  [ 0,             boat_wid/2,   boat_wid/2, 0,           (-boat_wid/2), (-boat_wid/2), 0]
+		# boat_wid = boat_len / 3 
+		# boat_outline_x =  [(-boat_len/2), (-boat_len/3), boat_len/3, boat_len/2,  boat_len/3,    (-boat_len/3), (-boat_len/2)]
+		# boat_outline_y =  [ 0,             boat_wid/2,   boat_wid/2, 0,           (-boat_wid/2), (-boat_wid/2), 0]
+		boat_outline_x =  [(-boat_len/2), boat_len/2]
+		boat_outline_y =  [ 0,            0]
+
 
 		if (single_output_fig and subplots):
 			for sp in subplot_idx:
 				p = axarr[sp]  
-				p.plot(boat_outline_x, boat_outline_y, c='0.5', linestyle='-.', alpha=0.5, zorder=1)
+				#p.plot(boat_outline_x, boat_outline_y, c='0.5', linestyle='-.', alpha=0.5, zorder=1)
+				p.plot(boat_outline_x, boat_outline_y, c='k', zorder=1, linewidth=1)
 				#p.fill(boat_outline_x, boat_outline_y, c='0.5', alpha=0.5, zorder=15)
 		else:
 			p = plt
-			p.plot(boat_outline_x, boat_outline_y, c='0.5', linestyle='-.', alpha=0.5, zorder=1)
+			#p.plot(boat_outline_x, boat_outline_y, c='0.5', linestyle='-.', alpha=0.5, zorder=1)
+			p.plot(boat_outline_x, boat_outline_y, c='k', zorder=1, linewidth=1)
 			#p.fill(boat_outline_x, boat_outline_y, c='0.5', alpha=0.5, zorder=15)
 
 
@@ -548,7 +663,7 @@ def actuator_assembly(*, nLinks_top, nLinks_bottom,
 
 start = time.time()
 
-actuator_assembly(nLinks_top = 2, nLinks_bottom = 0, 
+actuator_assembly(nLinks_top = 2, nLinks_bottom = 2, 
 				  link_lengths_top = [27.0], link_lengths_bottom = [27.0],
 				  joint_ranges_top = [pi/3], joint_ranges_bottom = [pi/3])
 

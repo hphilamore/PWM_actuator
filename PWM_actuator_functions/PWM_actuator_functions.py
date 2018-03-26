@@ -19,36 +19,51 @@ def angle_to_Xdatum(P0, P1, L):
     # Round P0 and P1 to avoid invalid value enter to arcsin
     P0y = round(P0[y],4)
     P1y = round(P1[y],4)
-    # P1[y] = round(P1[y],4)
-    # print(float(abs( P1[y] - P0[y] ) / L))
-    # print(np.arcsin(float(abs( P1[y] - P0[y] ) / L)))
 
     #acute_angle = np.arcsin(float(abs( P1[y] - P0[y] ) / L))
     acute_angle = np.arcsin(float(abs( P1y - P0y ) / L))
     print("acute angle", acute_angle)
 
-    # if   ((P1[x] > P0[x]) & (P1[y] > P0[y])): angle = acute_angle # print("Q1")
-    # elif ((P1[x] < P0[x]) & (P1[y] > P0[y])): angle = pi - acute_angle#, print("Q2")
-    # elif ((P1[x] < P0[x]) & (P1[y] < P0[y])): angle = pi + acute_angle#, print("Q3")
-    # else:                                     angle = 2 * pi - acute_angle#, print("Q4")
+    # if symmetric:
+    # 	angle = acute_angle if (P0[y] <= P1[y]) else (-acute_angle)# print("Q1")
 
+  
     if   ((P0[x] <= P1[x]) & (P0[y] <= P1[y])): angle = acute_angle # print("Q1")
     elif ((P0[x] > P1[x])  & (P0[y] <= P1[y])): angle = pi - acute_angle#, print("Q2")
     elif ((P0[x] > P1[x])  & (P0[y] > P1[y])):  angle = pi + acute_angle#, print("Q3")
     else: 										angle = 2 * pi - acute_angle#, print("Q4")
 
-       
     print("angle =", angle) 
     return angle
-    # quadrant = np.empty((2))
-    # quadrant[x] = 1 if (ep[x] > sp[x]) else 0
-    # quadrant[y] = 1 if (ep[y] > sp[y]) else 0
 
-
-def angle_to_Ydatum(P0, P1, L):
+def angle_abt_centre(P0, P1, L):
 	# TODO : L should be calculated from points P0 and P1 to avoid error
 	# assert can be used to check answer if desired
-    "Returns ACUTE angle (+ve, -ve) that the line P0-P1 (length = L) makes with the y (horizontal) datum."
+    "Returns angle (+ve, -ve) that the line P0-P1 (length = L) makes with the x (horizontal) datum."
+    x = 0
+    y = 1
+
+    # Round P0 and P1 to avoid invalid value enter to arcsin
+    P0y = round(P0[y],4)
+    P1y = round(P1[y],4)
+
+    acute_angle = np.arcsin(float(abs( P1y - P0y ) / L))
+    print("acute angle", acute_angle)
+
+    if   ((P0[x] <= P1[x]) & (P0[y] <= P1[y])): angle =   acute_angle # print("Q1")
+    elif ((P0[x] > P1[x])  & (P0[y] <= P1[y])): angle =   pi - acute_angle#, print("Q2")
+    elif ((P0[x] > P1[x])  & (P0[y] > P1[y])):  angle = -(pi - acute_angle)#, print("Q3")
+    else: 										angle = - acute_angle#, print("Q4")
+
+    print("actuator angle =", angle) 
+    return angle
+
+
+
+def angle_to_Ydatum(P0, P1, L, symmetric = True):
+	# TODO : L should be calculated from points P0 and P1 to avoid error
+	# assert can be used to check answer if desired
+    "Returns angle (+ve, -ve) that the line P0-P1 (length = L) makes with the y (vertical) datum."
     x = 0
     y = 1
 
@@ -56,23 +71,41 @@ def angle_to_Ydatum(P0, P1, L):
     P0x = round(P0[x],4)
     P1x = round(P1[x],4)
 
-    # acute_angle = np.arcsin(float(abs( P1[x] - P0[x] ) / L))
     acute_angle = np.arcsin(float(abs( P1x - P0x ) / L))
     print("acute angle", acute_angle)
 
-    # if   ((P1[x] > P0[x]) & (P1[y] > P0[y])): angle = acute_angle # print("Q1")
-    # elif ((P1[x] < P0[x]) & (P1[y] > P0[y])): angle = pi - acute_angle#, print("Q2")
-    # elif ((P1[x] < P0[x]) & (P1[y] < P0[y])): angle = pi + acute_angle#, print("Q3")
-    # else:                                     angle = 2 * pi - acute_angle#, print("Q4")
+    if symmetric:
 
-    angle = acute_angle if (P0[x] >= P1[x]) else (-acute_angle)# print("Q1")
-    # elif ((P0[x] > P1[x])  & (P0[y] <= P1[y])): angle = pi - acute_angle#, print("Q2")
-    # elif ((P0[x] > P1[x])  & (P0[y] > P1[y])):  angle = pi + acute_angle#, print("Q3")
-    # else: 				 angle = 2 * pi - acute_angle#, print("Q4")
+    	angle = acute_angle if (P0[x] >= P1[x]) else (-acute_angle)# print("Q1")
+
+    # else:
+    # 	if   ((P0[y] <= P1[y]) & (P0[x] <= P1[x])): angle = acute_angle # print("Q1")
+	   #  elif ((P0[y] > P1[y])  & (P0[x] <= P1[x])): angle = pi - acute_angle#, print("Q2")
+	   #  elif ((P0[y] > P1[y])  & (P0[x] > P1[x])):  angle = pi + acute_angle#, print("Q3")
+	   #  else: 										angle = 2 * pi - acute_angle#, print("Q4")
 
        
     print("angle =", angle) 
     return angle
+
+# def sym_angle_to_Xdatum(P0, P1, L):
+# 	# TODO : L should be calculated from points P0 and P1 to avoid error
+# 	# assert can be used to check answer if desired
+#     "Returns angle (+ve, -ve) that the line P0-P1 (length = L) makes with the y (horizontal) datum."
+#     x = 0
+#     y = 1
+
+#     # Round P0 and P1 to avoid invalid value enter to arcsin
+#     P0y = round(P0[y],4)
+#     P1y = round(P1[y],4)
+
+#     acute_angle = np.arcsin(float(abs( P1y - P0y ) / L))
+#     print("acute angle", acute_angle)
+
+#     angle = acute_angle if (P0[x] >= P1[x]) else (-acute_angle)# print("Q1")
+       
+#     print("angle =", angle) 
+#     return angle
 
 
 
